@@ -9,7 +9,7 @@ class User {
   String username = kGuestUsername;
   String password;
   String email = '';
-  String agentName;
+  String salesmanName;
   String token;
 
   static const int kGuestId = 1;
@@ -20,7 +20,7 @@ class User {
     id = App.application.data.prefs.getInt('id');
     username = App.application.data.prefs.getString('username');
     password = App.application.data.prefs.getString('password');
-    agentName = App.application.data.prefs.getString('agentName');
+    salesmanName = App.application.data.prefs.getString('salesmanName');
     email = App.application.data.prefs.getString('email');
     token = App.application.data.prefs.getString('token');
   }
@@ -35,7 +35,7 @@ class User {
     map['id'] = id;
     map['username'] = username;
     map['password'] = password;
-    map['agent_name'] = agentName;
+    map['salesman_name'] = salesmanName;
     map['email'] = email;
     map['token'] = token;
 
@@ -51,7 +51,7 @@ class User {
 
     user.id = userData['id'];
     user.email = userData['email'];
-    user.agentName = userData['agent_name'];
+    user.salesmanName = userData['salesman_name'];
     await user.save();
   }
 
@@ -60,7 +60,7 @@ class User {
     username = kGuestUsername;
     password = null;
     email = '';
-    agentName = null;
+    salesmanName = null;
     token = null;
 
     await save();
@@ -73,7 +73,7 @@ class User {
     await (username != null ? prefs.setString('username', username) : prefs.remove('username'));
     await (password != null ? prefs.setString('password', password) : prefs.remove('password'));
     await (email != null ? prefs.setString('email', email) : prefs.remove('email'));
-    await (agentName != null ? prefs.setString('agentName', agentName) : prefs.remove('agentName'));
+    await (salesmanName != null ? prefs.setString('salesmanName', salesmanName) : prefs.remove('salesmanName'));
     await (token != null ? prefs.setString('token', token) : prefs.remove('token'));
   }
 }

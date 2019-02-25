@@ -102,7 +102,7 @@ class _PersonPageState extends State<PersonPage> {
                   RaisedButton(
                     color: Colors.red,
                     onPressed: _logout,
-                    child: Text('Выйти'),
+                    child: Text('Выйти', style: TextStyle(color: Colors.white)),
                   ),
                 ]
               )

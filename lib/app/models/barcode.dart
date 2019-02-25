@@ -8,14 +8,13 @@ import 'package:retog/app/models/database_model.dart';
 class Barcode extends DatabaseModel {
   static String _tableName = 'barcodes';
 
-  int id;
   String barcode;
   int goodsId;
   int measureId;
 
   get tableName => _tableName;
 
-  Barcode({Map<String, dynamic> values, this.id, this.barcode, this.goodsId, this.measureId}) {
+  Barcode({Map<String, dynamic> values, this.barcode, this.goodsId, this.measureId}) {
     if (values != null) build(values);
   }
 
@@ -23,7 +22,6 @@ class Barcode extends DatabaseModel {
   void build(Map<String, dynamic> values) {
     super.build(values);
 
-    id = values['id'];
     barcode = values['barcode'];
     goodsId = values['goods_id'];
     measureId = values['measure_id'];
@@ -31,7 +29,6 @@ class Barcode extends DatabaseModel {
 
   Map<String, dynamic> toMap() {
     Map<String, dynamic> map = Map<String, dynamic>();
-    map['id'] = id;
     map['barcode'] = barcode;
     map['goods_id'] = goodsId;
     map['measure_id'] = measureId;

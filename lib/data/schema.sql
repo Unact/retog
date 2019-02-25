@@ -40,7 +40,6 @@ CREATE TABLE measures(
     local_deleted INTEGER DEFAULT 0
 );
 CREATE TABLE barcodes(
-    id INTEGER UNIQUE,
     goods_id INTEGER,
     barcode TEXT,
     measure_id INTEGER,
@@ -52,7 +51,6 @@ CREATE TABLE barcodes(
     local_deleted INTEGER DEFAULT 0
 );
 CREATE TABLE buyer_goods(
-    id INTEGER UNIQUE,
     goods_id INTEGER,
     buyer_id INTEGER,
 
