@@ -1,4 +1,4 @@
-package ru.unact.retog.retog;
+package ru.unact.retog;
 
 import android.os.Bundle;
 import io.flutter.app.FlutterActivity;
