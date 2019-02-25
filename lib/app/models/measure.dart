@@ -11,6 +11,8 @@ class Measure extends DatabaseModel {
   int id;
   String name;
 
+  static const int kPieceId = 3078;
+
   get tableName => _tableName;
 
   Measure({Map<String, dynamic> values, this.id, this.name}) {

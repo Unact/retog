@@ -81,11 +81,25 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_sticky_header:
+    dependency: "direct main"
+    description:
+      name: flutter_sticky_header
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.3.4"
   flutter_test:
     dependency: "direct dev"
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_typeahead:
+    dependency: "direct main"
+    description:
+      name: flutter_typeahead
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.5"
   http:
     dependency: "direct main"
     description:

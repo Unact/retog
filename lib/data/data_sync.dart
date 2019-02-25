@@ -9,7 +9,6 @@ import 'package:retog/app/models/buyer_goods.dart';
 import 'package:retog/app/models/goods.dart';
 import 'package:retog/app/models/measure.dart';
 import 'package:retog/app/models/partner.dart';
-import 'package:retog/app/models/return_goods.dart';
 import 'package:retog/app/models/user.dart';
 import 'package:retog/app/modules/api.dart';
 
@@ -33,15 +32,5 @@ class DataSync {
     await User.import(data['user']);
     await batch.commit();
     lastSyncTime = DateTime.now();
-  }
-
-  Future<Map<String, dynamic>> _dataForExport() async {
-    return {
-      'return_goods': ReturnGoods.export()
-    };
-  }
-
-  Future<void> exportData() async {
-    await Api.post('v2/retog/save', body: _dataForExport());
   }
 }

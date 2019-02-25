@@ -34,9 +34,8 @@ class _LoginPageState extends State<LoginPage> {
     try {
       showDialog(
         context: context,
-        builder: (BuildContext context) {
-          return Padding(padding: EdgeInsets.all(5.0), child: Center(child: CircularProgressIndicator()));
-        }
+        barrierDismissible: false,
+        builder: (BuildContext context) => CircularProgressIndicator()
       );
 
       await Api.login(_username, _password);

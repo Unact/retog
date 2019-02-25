@@ -21,6 +21,8 @@ dependencies:
   shared_preferences: any
   device_info: any
   package_info: any
+  flutter_typeahead: any
+  flutter_sticky_header: any
 
 dev_dependencies:
   flutter_test:

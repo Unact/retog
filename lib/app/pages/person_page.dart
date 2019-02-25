@@ -40,9 +40,7 @@ class _PersonPageState extends State<PersonPage> {
       showDialog(
         barrierDismissible: false,
         context: context,
-        builder: (BuildContext context) {
-          return Padding(padding: EdgeInsets.all(5.0), child: Center(child: CircularProgressIndicator()));
-        }
+        builder: (BuildContext context) => Center(child: CircularProgressIndicator())
       );
 
       await App.application.data.dataSync.importData();
@@ -88,7 +86,7 @@ class _PersonPageState extends State<PersonPage> {
           children: [
             _buildInfoRow('Логин', User.currentUser.username),
             _buildInfoRow('Версия', App.application.config.packageInfo.version),
-            _buildInfoRow('Обновление базы', lastSyncTimeText),
+            _buildInfoRow('Обновление БД', lastSyncTimeText),
             Padding(
               padding: EdgeInsets.only(top: 16.0, bottom: 16.0),
               child: Row(
@@ -97,7 +95,7 @@ class _PersonPageState extends State<PersonPage> {
                 children: <Widget>[
                   RaisedButton(
                     onPressed: _importData,
-                    child: Text('Обновить базу'),
+                    child: Text('Обновить БД'),
                   ),
                   RaisedButton(
                     color: Colors.red,

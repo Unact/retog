@@ -1,18 +1,15 @@
 import 'dart:async';
 
-import 'package:sqflite/sqflite.dart';
-
 import 'package:retog/app/app.dart';
 import 'package:retog/app/models/database_model.dart';
+import 'package:retog/app/models/measure.dart';
 
 class ReturnGoods extends DatabaseModel {
   static String _tableName = 'return_goods';
 
-  int id;
-  String name;
   int buyerId;
   int goodsId;
-  int measureId;
+  int measureId = Measure.kPieceId;
   double volume;
   DateTime productionDate;
   int goodsType;
@@ -21,8 +18,6 @@ class ReturnGoods extends DatabaseModel {
 
   ReturnGoods({
     Map<String, dynamic> values,
-    this.id,
-    this.name,
     this.buyerId,
     this.goodsId,
     this.measureId,
@@ -37,8 +32,6 @@ class ReturnGoods extends DatabaseModel {
   void build(Map<String, dynamic> values) {
     super.build(values);
 
-    id = values['id'];
-    name = values['name'];
     buyerId = values['buyer_id'];
     goodsId = values['goods_id'];
     measureId = values['measure_id'];
@@ -49,8 +42,6 @@ class ReturnGoods extends DatabaseModel {
 
   Map<String, dynamic> toMap() {
     Map<String, dynamic> map = Map<String, dynamic>();
-    map['id'] = id;
-    map['name'] = name;
     map['buyer_id'] = buyerId;
     map['goods_id'] = goodsId;
     map['measure_id'] = measureId;
@@ -65,12 +56,7 @@ class ReturnGoods extends DatabaseModel {
     return (await App.application.data.db.query(_tableName)).map((rec) => ReturnGoods(values: rec)).toList();
   }
 
-  static Future<void> import(List<dynamic> recs, Batch batch) async {
-    batch.delete(_tableName);
-    recs.forEach((rec) => batch.insert(_tableName, ReturnGoods(values: rec).toMap()));
-  }
-
-  static Future<List<Map<String, dynamic>>> export() async {
-    return (await ReturnGoods.all()).map((req) => req.toExportMap()).toList();
+  static Future<void> deleteAll() async {
+    return await App.application.data.db.delete(_tableName);
   }
 }
