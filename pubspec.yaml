@@ -1,0 +1,29 @@
+name: retog
+description: A new Flutter project.
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.1.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: any
+  path_provider: any
+  sqflite: any
+  http: any
+  intl: any
+  barcode_scan: any
+  sentry: any
+  dotenv: any
+  shared_preferences: any
+  device_info: any
+  package_info: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+# The following section is specific to Flutter.
+flutter:
+  uses-material-design: true
