@@ -182,13 +182,16 @@ class _ReturnGoodsEditPageState extends State<ReturnGoodsEditPage> with WidgetsB
       List<GoodsBarcode> barcodes = await GoodsBarcode.byBarcode(await BarcodeScanner.scan());
 
       if (barcodes.isNotEmpty) {
-        GoodsBarcode firstBarcode = barcodes.first;
-        Goods goods = widget.goodsDict.firstWhere((Goods goods) => goods.id == firstBarcode.goodsId, orElse: null);
+        GoodsBarcode firstRec = barcodes.first;
+        Goods goods = widget.goodsDict.firstWhere((Goods goods) => goods.id == firstRec.goodsId, orElse: () => null);
 
         if (goods == null) {
           errorMsg = 'Покупателю указанный товар не отгружался';
         } else {
           widget.returnGoods.goodsId = goods.id;
+          widget.returnGoods.measureId = firstRec.measureId;
+          await widget.returnGoods.update();
+          setState(() {});
         }
       } else {
         errorMsg = 'Товар не найден';

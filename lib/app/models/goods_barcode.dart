@@ -51,7 +51,7 @@ class GoodsBarcode extends DatabaseModel {
         goods_barcodes.*
       from $_tableName goods_barcodes
       where barcode = $barcode
-      order by goods_barcodes.measure
+      order by goods_barcodes.goods_id
     """)).map((rec) => GoodsBarcode(values: rec)).toList();
   }
 }
