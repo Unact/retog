@@ -46,7 +46,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Widget _buildPartnerSearch(BuildContext context) {
     ThemeData theme = Theme.of(context);
 
-    if (_partner != null) _partnerTextController.text = _partner.name;
+    _partnerTextController.text = _partner?.name ?? '';
 
     return TypeAheadField(
       textFieldConfiguration: TextFieldConfiguration(
@@ -100,9 +100,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Widget _buildBuyerSearch(BuildContext context) {
     ThemeData theme = Theme.of(context);
 
-    if (_buyer != null) _buyerTextController.text = _buyer.name;
+    _buyerTextController.text = _buyer?.name ?? '';
 
     return TypeAheadField(
+      getImmediateSuggestions: true,
       textFieldConfiguration: TextFieldConfiguration(
         cursorColor: theme.textSelectionColor,
         autocorrect: false,
@@ -343,6 +344,17 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     return Scaffold(
       key: _scaffoldKey,
       persistentFooterButtons: <Widget>[
+        FlatButton(
+          onPressed: () async {
+            await _clearReturnGoods();
+            _buyer = null;
+            _partner = null;
+            setState(() {});
+          },
+          child: Text('Очистить'),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32.0))
+        ),
+        SizedBox(width: 80),
         FlatButton(
           onPressed: () async => _editReturnGoods(await _addReturnGoods(), context),
           child: Text('Добавить'),
