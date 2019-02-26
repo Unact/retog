@@ -5,8 +5,8 @@ import 'package:sqflite/sqflite.dart';
 import 'package:retog/app/app.dart';
 import 'package:retog/app/models/database_model.dart';
 
-class Barcode extends DatabaseModel {
-  static String _tableName = 'barcodes';
+class GoodsBarcode extends DatabaseModel {
+  static String _tableName = 'goods_barcodes';
 
   String barcode;
   int goodsId;
@@ -14,7 +14,7 @@ class Barcode extends DatabaseModel {
 
   get tableName => _tableName;
 
-  Barcode({Map<String, dynamic> values, this.barcode, this.goodsId, this.measureId}) {
+  GoodsBarcode({Map<String, dynamic> values, this.barcode, this.goodsId, this.measureId}) {
     if (values != null) build(values);
   }
 
@@ -36,12 +36,22 @@ class Barcode extends DatabaseModel {
     return map;
   }
 
-  static Future<List<Barcode>> all() async {
-    return (await App.application.data.db.query(_tableName)).map((rec) => Barcode(values: rec)).toList();
+  static Future<List<GoodsBarcode>> all() async {
+    return (await App.application.data.db.query(_tableName)).map((rec) => GoodsBarcode(values: rec)).toList();
   }
 
   static Future<void> import(List<dynamic> recs, Batch batch) async {
     batch.delete(_tableName);
-    recs.forEach((rec) => batch.insert(_tableName, Barcode(values: rec).toMap()));
+    recs.forEach((rec) => batch.insert(_tableName, GoodsBarcode(values: rec).toMap()));
+  }
+
+  static Future<List<GoodsBarcode>> byBarcode(String barcode) async {
+    return (await App.application.data.db.rawQuery("""
+      select
+        goods_barcodes.*
+      from $_tableName goods_barcodes
+      where barcode = $barcode
+      order by goods_barcodes.measure
+    """)).map((rec) => GoodsBarcode(values: rec)).toList();
   }
 }

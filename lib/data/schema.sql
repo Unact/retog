@@ -39,7 +39,7 @@ CREATE TABLE measures(
     local_updated INTEGER DEFAULT 0,
     local_deleted INTEGER DEFAULT 0
 );
-CREATE TABLE barcodes(
+CREATE TABLE goods_barcodes(
     goods_id INTEGER,
     barcode TEXT,
     measure_id INTEGER,

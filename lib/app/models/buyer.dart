@@ -44,4 +44,14 @@ class Buyer extends DatabaseModel {
     batch.delete(_tableName);
     recs.forEach((rec) => batch.insert(_tableName, Buyer(values: rec).toMap()));
   }
+
+  static Future<Buyer> find(int buyerId) async {
+    return (await App.application.data.db.rawQuery("""
+      select
+        buyers.*
+      from $_tableName buyers
+      where id = $buyerId
+      order by buyers.name
+    """)).map((rec) => Buyer(values: rec)).first;
+  }
 }

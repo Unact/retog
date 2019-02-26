@@ -41,4 +41,15 @@ class Goods extends DatabaseModel {
     batch.delete(_tableName);
     recs.forEach((rec) => batch.insert(_tableName, Goods(values: rec).toMap()));
   }
+
+  static Future<List<Goods>> byBuyer(int buyerId) async {
+    return (await App.application.data.db.rawQuery("""
+      select
+        goods.*
+      from $_tableName goods
+      join buyer_goods on buyer_goods.goods_id = goods.id
+      where buyer_goods.buyer_id = $buyerId
+      order by goods.name
+    """)).map((rec) => Goods(values: rec)).toList();
+  }
 }

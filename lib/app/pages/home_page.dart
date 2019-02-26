@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:intl/intl.dart';
 
-import 'package:retog/app/pages/person_page.dart';
 import 'package:retog/app/models/buyer.dart';
+import 'package:retog/app/models/goods.dart';
+import 'package:retog/app/models/measure.dart';
 import 'package:retog/app/models/partner.dart';
 import 'package:retog/app/models/return_goods.dart';
 import 'package:retog/app/modules/api.dart';
+import 'package:retog/app/pages/person_page.dart';
+import 'package:retog/app/pages/return_goods_edit_page.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key}) : super(key: key);
@@ -22,6 +26,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   Partner _partner;
   Buyer _buyer;
+  List<Goods> _allGoods = [];
+  List<Measure> _allMeasures = [];
   List<ReturnGoods> _returnGoodsList = [];
 
   Widget _buildHeader(BuildContext context) {
@@ -40,10 +46,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Widget _buildPartnerSearch(BuildContext context) {
     ThemeData theme = Theme.of(context);
 
+    if (_partner != null) _partnerTextController.text = _partner.name;
+
     return TypeAheadField(
       textFieldConfiguration: TextFieldConfiguration(
         cursorColor: theme.textSelectionColor,
         autocorrect: false,
+        enabled: _buyer == null,
         controller: _partnerTextController,
         textInputAction: TextInputAction.search,
         decoration: InputDecoration(
@@ -83,7 +92,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       onSuggestionSelected: (Partner suggestion) async {
         setState(() {
           _partner = suggestion;
-          _partnerTextController.text = suggestion.name;
         });
       }
     );
@@ -92,11 +100,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Widget _buildBuyerSearch(BuildContext context) {
     ThemeData theme = Theme.of(context);
 
+    if (_buyer != null) _buyerTextController.text = _buyer.name;
+
     return TypeAheadField(
       textFieldConfiguration: TextFieldConfiguration(
         cursorColor: theme.textSelectionColor,
         autocorrect: false,
-        enabled: _partner != null,
+        enabled: _returnGoodsList.isEmpty && _partner != null,
         controller: _buyerTextController,
         textInputAction: TextInputAction.search,
         decoration: InputDecoration(
@@ -134,37 +144,93 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         );
       },
       onSuggestionSelected: (Buyer suggestion) async {
+        _allGoods = await Goods.byBuyer(suggestion.id);
         setState(() {
           _buyer = suggestion;
-          _buyerTextController.text = suggestion.name;
         });
       }
     );
   }
-
-  Widget _buildReturnGoodsTile(ReturnGoods returnGoods, BuildContext context) {
-    return Container();
+  Widget _buildReturnGoodsTile(BuildContext context, ReturnGoods returnGoods) {
+    return Card(
+      child: Padding(
+        padding: EdgeInsets.all(8),
+        child: Column(
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                SizedBox(width: 80, child: Text('Товар', style: TextStyle(color: Colors.grey))),
+                Flexible(
+                  child: Column(
+                    children: <Widget>[
+                      Text(_allGoods.isNotEmpty && returnGoods.goodsId != null ?
+                        _allGoods.firstWhere((Goods goods) => returnGoods.goodsId == goods.id).name :
+                        ''
+                      )
+                    ]
+                  )
+                )
+              ]
+            ),
+            SizedBox(height: 8),
+            Row(
+              children: <Widget>[
+                SizedBox(width: 80, child: Text('Состояние', style: TextStyle(color: Colors.grey))),
+                Text(returnGoods.goodsType != null ?
+                  (returnGoods.goodsType == GoodsTypes.bad.index ? 'Некондиция' : 'Кондиция') :
+                  ''
+                )
+              ]
+            ),
+            SizedBox(height: 8),
+            Row(
+              children: <Widget>[
+                SizedBox(width: 80, child: Text('Дата', style: TextStyle(color: Colors.grey))),
+                Text(returnGoods.productionDate != null ?
+                  DateFormat.yMMMd('ru').format(returnGoods.productionDate) :
+                  ''
+                )
+              ]
+            ),
+            SizedBox(height: 8),
+            Row(
+              children: <Widget>[
+                SizedBox(width: 80, child: Text('Кол-во', style: TextStyle(color: Colors.grey))),
+                Text(returnGoods.volume != null ? returnGoods.volume.toString() : ''),
+                SizedBox(width: 8),
+                SizedBox(width: 80, child: Text('Ед. изм.', style: TextStyle(color: Colors.grey))),
+                Text(_allMeasures.isNotEmpty && returnGoods.measureId != null ?
+                  _allMeasures.firstWhere((Measure measure) => returnGoods.measureId == measure.id).name :
+                  ''
+                )
+              ]
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                IconButton(
+                  icon: Icon(Icons.edit),
+                  onPressed: () async => _editReturnGoods(returnGoods, context)
+                ),
+                IconButton(
+                  icon: Icon(Icons.delete, color: Colors.red,),
+                  onPressed: () async => _removeReturnGoods(returnGoods)
+                )
+              ],
+            )
+          ],
+        ),
+      )
+    );
   }
 
   Widget _buildSliver(BuildContext context) {
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         (BuildContext context, int idx) {
-          Widget result;
-          if (idx + 1 > _returnGoodsList.length) {
-            result = Center(
-              child: RaisedButton(
-                onPressed: _addReturnGoods,
-                child: Text('Добавить позицию'),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32.0))
-            ));
-          } else {
-            result = Padding(padding: EdgeInsets.all(8), child: _buildReturnGoodsTile(_returnGoodsList[idx], context));
-          }
-
-          return result;
+          return Padding(padding: EdgeInsets.all(8), child: _buildReturnGoodsTile(context, _returnGoodsList[idx]));
         },
-        childCount: _returnGoodsList.length + 1
+        childCount: _returnGoodsList.length
       )
     );
   }
@@ -184,15 +250,35 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     _scaffoldKey.currentState?.showSnackBar(SnackBar(content: Text(content)));
   }
 
-  Future<void> _addReturnGoods() async {
+  Future<void> _editReturnGoods(ReturnGoods returnGoods, BuildContext context) async {
+    if (returnGoods != null) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (BuildContext context) =>
+            ReturnGoodsEditPage(returnGoods: returnGoods, goodsDict: _allGoods, measureDict: _allMeasures)
+        )
+      );
+    }
+  }
+
+  Future<ReturnGoods> _addReturnGoods() async {
     if (_buyer == null) {
       _showMessage('Не выбран покупатель');
-      return;
+      return null;
     }
 
     ReturnGoods newReturnGoods = await ReturnGoods(buyerId: _buyer.id).insert();
     setState(() {
       _returnGoodsList.add(newReturnGoods);
+    });
+
+    return newReturnGoods;
+  }
+
+  Future<void> _removeReturnGoods(ReturnGoods returnGoods) async {
+    await returnGoods.delete();
+    setState(() {
+      _returnGoodsList.remove(returnGoods);
     });
   }
 
@@ -233,7 +319,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   Future<void> _loadData() async {
+    _allMeasures = await Measure.all();
     _returnGoodsList = await ReturnGoods.all();
+    if (_returnGoodsList.isNotEmpty) {
+      _buyer = await Buyer.find(_returnGoodsList.first.buyerId);
+      _partner = await Partner.find(_buyer.partnerId);
+      _allGoods = await Goods.byBuyer(_buyer.id);
+    }
 
     if (mounted) {
       setState(() {});
@@ -250,22 +342,30 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Theme.of(context).accentColor,
-        child: Icon(Icons.save),
-        onPressed: _saveReturnGoods,
-      ),
+      persistentFooterButtons: <Widget>[
+        FlatButton(
+          onPressed: () async => _editReturnGoods(await _addReturnGoods(), context),
+          child: Text('Добавить'),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32.0))
+        ),
+        FlatButton(
+          onPressed: _saveReturnGoods,
+          child: Text('Сохранить'),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32.0))
+        ),
+      ],
       appBar: AppBar(
         title: Text('Возвраты'),
         actions: <Widget>[
           IconButton(
             color: Colors.white,
             icon: Icon(Icons.person),
-            onPressed: () {
-              Navigator.push(
+            onPressed: () async {
+              await Navigator.push(
                 context,
                 MaterialPageRoute(builder: (BuildContext context) => PersonPage(), fullscreenDialog: true)
               );
+              _loadData();
             }
           )
         ]
