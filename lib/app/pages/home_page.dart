@@ -283,9 +283,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     });
   }
 
-  Future<void> _clearReturnGoods() async {
+  Future<void> _clear() async {
     await ReturnGoods.deleteAll();
     setState(() {
+      _buyer = null;
+      _partner = null;
       _returnGoodsList = [];
     });
   }
@@ -304,11 +306,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       );
 
       await Api.post('v2/retog/save', body: {
-        'return_goods': _returnGoodsList.map((ReturnGoods returnGoods) => returnGoods.toExportMap())
+        'return_goods': _returnGoodsList.map((ReturnGoods returnGoods) => returnGoods.toExportMap()).toList()
       });
       Navigator.pop(context);
       _showMessage('Возвраты успешно созданы');
-      _clearReturnGoods();
+      _clear();
     } on ApiException catch(e) {
       Navigator.pop(context);
 
@@ -345,16 +347,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       key: _scaffoldKey,
       persistentFooterButtons: <Widget>[
         FlatButton(
-          onPressed: () async {
-            await _clearReturnGoods();
-            _buyer = null;
-            _partner = null;
-            setState(() {});
-          },
+          onPressed: _clear,
           child: Text('Очистить'),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32.0))
         ),
-        SizedBox(width: 80),
+        SizedBox(width: 24),
         FlatButton(
           onPressed: () async => _editReturnGoods(await _addReturnGoods(), context),
           child: Text('Добавить'),

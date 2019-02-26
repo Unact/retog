@@ -124,7 +124,7 @@ class _ReturnGoodsEditPageState extends State<ReturnGoodsEditPage> with WidgetsB
   }
 
   Widget _buildVolumeField(BuildContext context) {
-    _volumeTextController.text = widget.returnGoods.volume.toString();
+    _volumeTextController.text = widget.returnGoods.volume?.toString() ?? '';
 
     return TextField(
       controller: _volumeTextController,
@@ -134,7 +134,7 @@ class _ReturnGoodsEditPageState extends State<ReturnGoodsEditPage> with WidgetsB
         labelText: 'Кол-во'
       ),
       onChanged: (String value) async {
-        widget.returnGoods.volume = int.parse(value);
+        widget.returnGoods.volume = int.tryParse(value);
         await widget.returnGoods.update();
         setState(() {});
       }

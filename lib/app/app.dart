@@ -47,7 +47,8 @@ class App {
     return MaterialApp(
       title: title,
       theme: ThemeData(
-        primarySwatch: Colors.blue
+        primarySwatch: Colors.blue,
+        platform: TargetPlatform.android
       ),
       routes: {
         '/': (BuildContext context) => HomePage(),
