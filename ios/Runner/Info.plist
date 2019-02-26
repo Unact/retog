@@ -43,5 +43,7 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>NSCameraUsageDescription</key>
+	<string>Для сканирования штрих-кода необходимо дать доступ к камере</string>
 </dict>
 </plist>
