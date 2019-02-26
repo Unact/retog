@@ -35,7 +35,7 @@ class _LoginPageState extends State<LoginPage> {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (BuildContext context) => CircularProgressIndicator()
+        builder: (BuildContext context) => Center(child: CircularProgressIndicator())
       );
 
       await Api.login(_username, _password);
