@@ -5,11 +5,6 @@ import 'package:retog/app/models/database_model.dart';
 import 'package:retog/app/models/measure.dart';
 import 'package:retog/app/utils/nullify.dart';
 
-enum GoodsTypes {
-  bad,
-  good
-}
-
 class ReturnGoods extends DatabaseModel {
   static String _tableName = 'return_goods';
 
@@ -18,7 +13,7 @@ class ReturnGoods extends DatabaseModel {
   int measureId;
   int volume;
   DateTime productionDate;
-  int goodsType;
+  bool isBad;
 
   static const int kDefaultVolume = 1;
 
@@ -31,7 +26,7 @@ class ReturnGoods extends DatabaseModel {
     this.measureId = Measure.kPieceId,
     this.volume = kDefaultVolume,
     this.productionDate,
-    this.goodsType
+    this.isBad
   }) {
     if (values != null) build(values);
   }
@@ -45,7 +40,7 @@ class ReturnGoods extends DatabaseModel {
     measureId = values['measure_id'];
     volume = values['volume'];
     productionDate = Nullify.parseDate(values['production_date']);
-    goodsType = values['goods_type'];
+    isBad = Nullify.parseBool(values['is_bad']);
   }
 
   Map<String, dynamic> toMap() {
@@ -55,7 +50,7 @@ class ReturnGoods extends DatabaseModel {
     map['measure_id'] = measureId;
     map['volume'] = volume;
     map['production_date'] = productionDate?.toIso8601String();
-    map['goods_type'] = goodsType;
+    map['is_bad'] = isBad;
 
     return map;
   }

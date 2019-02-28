@@ -66,7 +66,7 @@ CREATE TABLE return_goods(
     measure_id INTEGER,
     volume DECIMAL,
     production_date DATETIME,
-    goods_type INTEGER,
+    is_bad INTEGER,
 
     local_ts DATETIME DEFAULT CURRENT_TIMESTAMP,
     local_id INTEGER PRIMARY KEY,

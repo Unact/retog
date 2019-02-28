@@ -177,10 +177,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             Row(
               children: <Widget>[
                 SizedBox(width: 80, child: Text('Состояние', style: TextStyle(color: Colors.grey))),
-                Text(returnGoods.goodsType != null ?
-                  (returnGoods.goodsType == GoodsTypes.bad.index ? 'Некондиция' : 'Кондиция') :
-                  ''
-                )
+                Text(returnGoods.isBad != null ? (returnGoods.isBad ? 'Некондиция' : 'Кондиция') : '')
               ]
             ),
             SizedBox(height: 8),

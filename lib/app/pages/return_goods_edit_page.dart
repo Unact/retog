@@ -93,15 +93,15 @@ class _ReturnGoodsEditPageState extends State<ReturnGoodsEditPage> with WidgetsB
         contentPadding: EdgeInsets.all(8),
         labelText: 'Состояние'
       ),
-      items: <int>[GoodsTypes.bad.index, GoodsTypes.good.index].map((int value) {
-        return DropdownMenuItem<int>(
+      items: <bool>[false, true].map((bool value) {
+        return DropdownMenuItem<bool>(
           value: value,
-          child: Text(GoodsTypes.bad.index == value ? 'Некондиция' : 'Кондиция'),
+          child: Text(value ? 'Некондиция' : 'Кондиция'),
         );
       }).toList(),
-      value: widget.returnGoods.goodsType,
-      onChanged: (int value) async {
-        widget.returnGoods.goodsType = value;
+      value: widget.returnGoods.isBad,
+      onChanged: (bool value) async {
+        widget.returnGoods.isBad = value;
         await widget.returnGoods.update();
         setState(() {});
       }
