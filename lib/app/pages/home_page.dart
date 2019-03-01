@@ -28,10 +28,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   Partner _partner;
   Buyer _buyer;
-  ReturnOrder _returnOrder;
+  ReturnOrder _returnOrder = ReturnOrder();
   List<Goods> _allGoods = [];
   List<Measure> _allMeasures = [];
-  List<ReturnGoods> _returnGoodsList = [];
 
   Widget _buildHeader(BuildContext context) {
     return Container(
@@ -110,7 +109,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       textFieldConfiguration: TextFieldConfiguration(
         cursorColor: theme.textSelectionColor,
         autocorrect: false,
-        enabled: _returnGoodsList.isEmpty && _partner != null,
+        enabled: _returnOrder.returnGoods.isEmpty && _partner != null,
         controller: _buyerTextController,
         textInputAction: TextInputAction.search,
         decoration: InputDecoration(
@@ -233,9 +232,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         (BuildContext context, int idx) {
-          return Padding(padding: EdgeInsets.all(8), child: _buildReturnGoodsTile(context, _returnGoodsList[idx]));
+          return Padding(
+            padding: EdgeInsets.all(8),
+            child: _buildReturnGoodsTile(context, _returnOrder.returnGoods[idx])
+          );
         },
-        childCount: _returnGoodsList.length
+        childCount: _returnOrder.returnGoods.length
       )
     );
   }
@@ -279,7 +281,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
     ReturnGoods newReturnGoods = await ReturnGoods(returnOrderId: _returnOrder.localId).insert();
     setState(() {
-      _returnGoodsList.add(newReturnGoods);
+      _returnOrder.returnGoods.add(newReturnGoods);
     });
 
     return newReturnGoods;
@@ -288,7 +290,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Future<void> _removeReturnGoods(ReturnGoods returnGoods) async {
     await returnGoods.delete();
     setState(() {
-      _returnGoodsList.remove(returnGoods);
+      _returnOrder.returnGoods.remove(returnGoods);
     });
   }
 
@@ -303,12 +305,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     setState(() {
       _buyer = null;
       _partner = null;
-      _returnGoodsList = [];
     });
   }
 
   Future<void> _saveReturnGoods() async {
-    if (_returnGoodsList.isEmpty) {
+    if (_returnOrder.returnGoods.isEmpty) {
       _showMessage('Нет позиций для возврата');
       return;
     }
@@ -322,7 +323,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
       await Api.post('v2/retog/save', body: {
         'return_order': _returnOrder.toExportMap(),
-        'return_goods': _returnGoodsList.map((ReturnGoods returnGoods) => returnGoods.toExportMap()).toList()
+        'return_goods': _returnOrder.returnGoods.map((ReturnGoods returnGoods) => returnGoods.toExportMap()).toList()
       });
       Navigator.pop(context);
       _showMessage('Возвраты успешно созданы');
@@ -342,7 +343,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
     if (User.currentUser.cReturnOrder != null) {
       _returnOrder = await ReturnOrder.find(User.currentUser.cReturnOrder);
-      _returnGoodsList = await ReturnGoods.byReturnOrder(_returnOrder.localId);
+      await _returnOrder.loadReturnGoods();
 
       if (_returnOrder.buyerId != null) {
         _buyer = await Buyer.find(_returnOrder.buyerId);

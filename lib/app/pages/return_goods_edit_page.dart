@@ -116,7 +116,16 @@ class _ReturnGoodsEditPageState extends State<ReturnGoodsEditPage> with WidgetsB
       selectedDate: widget.returnGoods.productionDate,
       decoration: InputDecoration(
         contentPadding: EdgeInsets.all(8),
-        labelText: 'Дата производства'
+        labelText: 'Дата производства',
+        suffixIcon: widget.returnGoods.productionDate != null ?
+          IconButton(
+            icon: Icon(Icons.clear),
+            onPressed: () async {
+              widget.returnGoods.productionDate = null;
+              await widget.returnGoods.update();
+              setState(() {});
+            },
+          ) : null
       ),
       selectDate: (DateTime value) async {
         widget.returnGoods.productionDate = value;

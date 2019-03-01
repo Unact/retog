@@ -2,11 +2,13 @@ import 'dart:async';
 
 import 'package:retog/app/app.dart';
 import 'package:retog/app/models/database_model.dart';
+import 'package:retog/app/models/return_goods.dart';
 
 class ReturnOrder extends DatabaseModel {
   static String _tableName = 'return_orders';
 
   int buyerId;
+  List<ReturnGoods> returnGoods = [];
 
   get tableName => _tableName;
 
@@ -29,6 +31,10 @@ class ReturnOrder extends DatabaseModel {
     map['buyer_id'] = buyerId;
 
     return map;
+  }
+
+  Future<void> loadReturnGoods() async {
+    returnGoods = await ReturnGoods.byReturnOrder(localId);
   }
 
   static Future<List<ReturnOrder>> all() async {

@@ -16,8 +16,8 @@ import 'package:retog/app/modules/api.dart';
 
 class DataSync {
   DateTime get lastSyncTime {
-    String time = App.application.data.prefs.getString('lastSyncTime');
-    return time != null ? DateTime.parse(time) : null;
+    String time = App.application.data.prefs.getString('lastSyncTime') ?? '';
+    return time != '' ? DateTime.parse(time) : null;
   }
   set lastSyncTime(val) => App.application.data.prefs.setString('lastSyncTime', val.toString());
 
@@ -46,6 +46,6 @@ class DataSync {
     await ReturnGoods.deleteAll();
     await ReturnOrder.deleteAll();
     await User.currentUser.reset();
-    lastSyncTime = null;
+    lastSyncTime = '';
   }
 }
