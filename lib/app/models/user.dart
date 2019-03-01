@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:retog/app/app.dart';
+import 'package:retog/app/modules/api.dart';
 
 class User {
   int id = kGuestId;
@@ -48,13 +49,13 @@ class User {
     return password != null;
   }
 
-  static Future<void> import(Map<String, dynamic> userData) async {
-    User user = User.currentUser;
+  Future<void> loadDataFromRemote() async {
+    Map<String, dynamic> userData = await Api.get('v2/retog/user_info');
 
-    user.id = userData['id'];
-    user.email = userData['email'];
-    user.salesmanName = userData['salesman_name'];
-    await user.save();
+    id = userData['id'];
+    email = userData['email'];
+    salesmanName = userData['salesman_name'];
+    await save();
   }
 
   Future<void> reset() async {

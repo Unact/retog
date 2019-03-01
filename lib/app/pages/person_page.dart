@@ -26,6 +26,7 @@ class _PersonPageState extends State<PersonPage> {
       );
 
       await Api.logout();
+      await User.currentUser.reset();
       await App.application.data.dataSync.clearData();
       Navigator.pushNamedAndRemoveUntil(context, '/login', (Route<dynamic> route) => false);
     } on ApiException catch(e) {

@@ -78,6 +78,7 @@ class Api {
     User.currentUser.username = username;
     User.currentUser.password = password;
     await User.currentUser.save();
+    await User.currentUser.loadDataFromRemote();
   }
 
   static Future<void> logout() async {

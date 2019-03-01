@@ -31,7 +31,6 @@ class DataSync {
     await GoodsBarcode.import(data['goods_barcodes'], batch);
     await Measure.import(data['measures'], batch);
     await Partner.import(data['partners'], batch);
-    await User.import(data['user']);
     await batch.commit();
     lastSyncTime = DateTime.now();
   }
@@ -45,7 +44,6 @@ class DataSync {
     await Partner.deleteAll();
     await ReturnGoods.deleteAll();
     await ReturnOrder.deleteAll();
-    await User.currentUser.reset();
     lastSyncTime = '';
   }
 }
