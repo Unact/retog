@@ -60,8 +60,17 @@ CREATE TABLE buyer_goods(
     local_updated INTEGER DEFAULT 0,
     local_deleted INTEGER DEFAULT 0
 );
-CREATE TABLE return_goods(
+CREATE TABLE return_orders(
     buyer_id INTEGER,
+
+    local_ts DATETIME DEFAULT CURRENT_TIMESTAMP,
+    local_id INTEGER PRIMARY KEY,
+    local_inserted INTEGER DEFAULT 0,
+    local_updated INTEGER DEFAULT 0,
+    local_deleted INTEGER DEFAULT 0
+);
+CREATE TABLE return_goods(
+    return_order_id INTEGER,
     goods_id INTEGER,
     measure_id INTEGER,
     volume DECIMAL,

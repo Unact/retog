@@ -11,6 +11,7 @@ class User {
   String email = '';
   String salesmanName;
   String token;
+  int cReturnOrder;
 
   static const int kGuestId = 1;
   static const String kGuestUsername = 'guest';
@@ -23,6 +24,7 @@ class User {
     salesmanName = App.application.data.prefs.getString('salesmanName');
     email = App.application.data.prefs.getString('email');
     token = App.application.data.prefs.getString('token');
+    cReturnOrder = App.application.data.prefs.getInt('cReturnOrder');
   }
 
   User._();
@@ -62,6 +64,7 @@ class User {
     email = '';
     salesmanName = null;
     token = null;
+    cReturnOrder = null;
 
     await save();
   }
@@ -75,5 +78,6 @@ class User {
     await (email != null ? prefs.setString('email', email) : prefs.remove('email'));
     await (salesmanName != null ? prefs.setString('salesmanName', salesmanName) : prefs.remove('salesmanName'));
     await (token != null ? prefs.setString('token', token) : prefs.remove('token'));
+    await (cReturnOrder != null ? prefs.setInt('cReturnOrder', cReturnOrder) : prefs.remove('cReturnOrder'));
   }
 }

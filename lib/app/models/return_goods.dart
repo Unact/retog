@@ -8,7 +8,7 @@ import 'package:retog/app/utils/nullify.dart';
 class ReturnGoods extends DatabaseModel {
   static String _tableName = 'return_goods';
 
-  int buyerId;
+  int returnOrderId;
   int goodsId;
   int measureId;
   int volume;
@@ -21,7 +21,7 @@ class ReturnGoods extends DatabaseModel {
 
   ReturnGoods({
     Map<String, dynamic> values,
-    this.buyerId,
+    this.returnOrderId,
     this.goodsId,
     this.measureId = Measure.kPieceId,
     this.volume = kDefaultVolume,
@@ -35,7 +35,7 @@ class ReturnGoods extends DatabaseModel {
   void build(Map<String, dynamic> values) {
     super.build(values);
 
-    buyerId = values['buyer_id'];
+    returnOrderId = values['return_order_id'];
     goodsId = values['goods_id'];
     measureId = values['measure_id'];
     volume = values['volume'];
@@ -45,7 +45,7 @@ class ReturnGoods extends DatabaseModel {
 
   Map<String, dynamic> toMap() {
     Map<String, dynamic> map = Map<String, dynamic>();
-    map['buyer_id'] = buyerId;
+    map['return_order_id'] = returnOrderId;
     map['goods_id'] = goodsId;
     map['measure_id'] = measureId;
     map['volume'] = volume;
@@ -61,5 +61,15 @@ class ReturnGoods extends DatabaseModel {
 
   static Future<void> deleteAll() async {
     return await App.application.data.db.delete(_tableName);
+  }
+
+  static Future<List<ReturnGoods>> byReturnOrder(int returnOrderId) async {
+    return (await App.application.data.db.rawQuery("""
+      select
+        return_goods.*
+      from $_tableName return_goods
+      where return_order_id = $returnOrderId
+      order by local_ts
+    """)).map((rec) => ReturnGoods(values: rec)).toList();
   }
 }

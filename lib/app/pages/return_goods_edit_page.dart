@@ -7,14 +7,17 @@ import 'package:retog/app/models/goods.dart';
 import 'package:retog/app/models/goods_barcode.dart';
 import 'package:retog/app/models/measure.dart';
 import 'package:retog/app/models/return_goods.dart';
+import 'package:retog/app/models/return_order.dart';
 import 'package:retog/app/widgets/date_picker_widget.dart';
 
 class ReturnGoodsEditPage extends StatefulWidget {
+  final ReturnOrder returnOrder;
   final ReturnGoods returnGoods;
   final List<Goods> goodsDict;
   final List<Measure> measureDict;
 
   ReturnGoodsEditPage({
+    @required this.returnOrder,
     @required this.returnGoods,
     @required this.goodsDict,
     @required this.measureDict,
@@ -70,7 +73,7 @@ class _ReturnGoodsEditPageState extends State<ReturnGoodsEditPage> with WidgetsB
         );
       },
       suggestionsCallback: (String value) async {
-        return (await Goods.byBuyer(widget.returnGoods.buyerId)).where(
+        return (await Goods.byBuyer(widget.returnOrder.buyerId)).where(
           (Goods goods) => goods.name.toLowerCase().contains(value.toLowerCase())
         ).toList();
       },

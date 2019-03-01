@@ -10,6 +10,7 @@ import 'package:retog/app/models/goods_barcode.dart';
 import 'package:retog/app/models/measure.dart';
 import 'package:retog/app/models/partner.dart';
 import 'package:retog/app/models/return_goods.dart';
+import 'package:retog/app/models/return_order.dart';
 import 'package:retog/app/models/user.dart';
 import 'package:retog/app/modules/api.dart';
 
@@ -43,6 +44,7 @@ class DataSync {
     await Measure.deleteAll();
     await Partner.deleteAll();
     await ReturnGoods.deleteAll();
+    await ReturnOrder.deleteAll();
     await User.currentUser.reset();
     lastSyncTime = null;
   }

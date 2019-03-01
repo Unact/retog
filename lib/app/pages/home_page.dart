@@ -9,6 +9,8 @@ import 'package:retog/app/models/goods.dart';
 import 'package:retog/app/models/measure.dart';
 import 'package:retog/app/models/partner.dart';
 import 'package:retog/app/models/return_goods.dart';
+import 'package:retog/app/models/return_order.dart';
+import 'package:retog/app/models/user.dart';
 import 'package:retog/app/modules/api.dart';
 import 'package:retog/app/pages/person_page.dart';
 import 'package:retog/app/pages/return_goods_edit_page.dart';
@@ -26,6 +28,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   Partner _partner;
   Buyer _buyer;
+  ReturnOrder _returnOrder;
   List<Goods> _allGoods = [];
   List<Measure> _allMeasures = [];
   List<ReturnGoods> _returnGoodsList = [];
@@ -146,6 +149,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       },
       onSuggestionSelected: (Buyer suggestion) async {
         _allGoods = await Goods.byBuyer(suggestion.id);
+
+        _returnOrder.buyerId = suggestion.id;
+        await _returnOrder.update();
+
         setState(() {
           _buyer = suggestion;
         });
@@ -253,7 +260,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (BuildContext context) =>
-            ReturnGoodsEditPage(returnGoods: returnGoods, goodsDict: _allGoods, measureDict: _allMeasures)
+            ReturnGoodsEditPage(
+              returnOrder: _returnOrder,
+              returnGoods: returnGoods,
+              goodsDict: _allGoods,
+              measureDict: _allMeasures
+            )
         )
       );
     }
@@ -265,7 +277,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       return null;
     }
 
-    ReturnGoods newReturnGoods = await ReturnGoods(buyerId: _buyer.id).insert();
+    ReturnGoods newReturnGoods = await ReturnGoods(returnOrderId: _returnOrder.localId).insert();
     setState(() {
       _returnGoodsList.add(newReturnGoods);
     });
@@ -280,8 +292,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     });
   }
 
+  Future<void> _createReturnOrder() async {
+    _returnOrder = await ReturnOrder().insert();
+    User.currentUser.cReturnOrder = _returnOrder.localId;
+    await User.currentUser.save();
+  }
+
   Future<void> _clear() async {
-    await ReturnGoods.deleteAll();
+    await _createReturnOrder();
     setState(() {
       _buyer = null;
       _partner = null;
@@ -303,6 +321,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       );
 
       await Api.post('v2/retog/save', body: {
+        'return_order': _returnOrder.toExportMap(),
         'return_goods': _returnGoodsList.map((ReturnGoods returnGoods) => returnGoods.toExportMap()).toList()
       });
       Navigator.pop(context);
@@ -320,11 +339,18 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   Future<void> _loadData() async {
     _allMeasures = await Measure.all();
-    _returnGoodsList = await ReturnGoods.all();
-    if (_returnGoodsList.isNotEmpty) {
-      _buyer = await Buyer.find(_returnGoodsList.first.buyerId);
-      _partner = await Partner.find(_buyer.partnerId);
-      _allGoods = await Goods.byBuyer(_buyer.id);
+
+    if (User.currentUser.cReturnOrder != null) {
+      _returnOrder = await ReturnOrder.find(User.currentUser.cReturnOrder);
+      _returnGoodsList = await ReturnGoods.byReturnOrder(_returnOrder.localId);
+
+      if (_returnOrder.buyerId != null) {
+        _buyer = await Buyer.find(_returnOrder.buyerId);
+        _partner = await Partner.find(_buyer.partnerId);
+        _allGoods = await Goods.byBuyer(_buyer.id);
+      }
+    } else {
+      await _createReturnOrder();
     }
 
     if (mounted) {
