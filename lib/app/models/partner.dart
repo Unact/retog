@@ -42,6 +42,10 @@ class Partner extends DatabaseModel {
     recs.forEach((rec) => batch.insert(_tableName, Partner(values: rec).toMap()));
   }
 
+  static Future<void> deleteAll() async {
+    return await App.application.data.db.delete(_tableName);
+  }
+
   static Future<Partner> find(int partnerId) async {
     return (await App.application.data.db.rawQuery("""
       select

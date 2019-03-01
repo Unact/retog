@@ -45,6 +45,10 @@ class Buyer extends DatabaseModel {
     recs.forEach((rec) => batch.insert(_tableName, Buyer(values: rec).toMap()));
   }
 
+  static Future<void> deleteAll() async {
+    return await App.application.data.db.delete(_tableName);
+  }
+
   static Future<Buyer> find(int buyerId) async {
     return (await App.application.data.db.rawQuery("""
       select

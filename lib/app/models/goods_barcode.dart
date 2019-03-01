@@ -45,6 +45,10 @@ class GoodsBarcode extends DatabaseModel {
     recs.forEach((rec) => batch.insert(_tableName, GoodsBarcode(values: rec).toMap()));
   }
 
+  static Future<void> deleteAll() async {
+    return await App.application.data.db.delete(_tableName);
+  }
+
   static Future<List<GoodsBarcode>> byBarcode(String barcode) async {
     return (await App.application.data.db.rawQuery("""
       select
