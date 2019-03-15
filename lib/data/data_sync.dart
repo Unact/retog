@@ -7,11 +7,9 @@ import 'package:retog/app/models/buyer.dart';
 import 'package:retog/app/models/buyer_goods.dart';
 import 'package:retog/app/models/goods.dart';
 import 'package:retog/app/models/goods_barcode.dart';
-import 'package:retog/app/models/measure.dart';
 import 'package:retog/app/models/partner.dart';
 import 'package:retog/app/models/return_goods.dart';
 import 'package:retog/app/models/return_order.dart';
-import 'package:retog/app/models/user.dart';
 import 'package:retog/app/modules/api.dart';
 
 class DataSync {
@@ -29,7 +27,6 @@ class DataSync {
     await BuyerGoods.import(data['buyer_goods'], batch);
     await Goods.import(data['goods'], batch);
     await GoodsBarcode.import(data['goods_barcodes'], batch);
-    await Measure.import(data['measures'], batch);
     await Partner.import(data['partners'], batch);
     await batch.commit();
     lastSyncTime = DateTime.now();
@@ -40,7 +37,6 @@ class DataSync {
     await BuyerGoods.deleteAll();
     await Goods.deleteAll();
     await GoodsBarcode.deleteAll();
-    await Measure.deleteAll();
     await Partner.deleteAll();
     await ReturnGoods.deleteAll();
     await ReturnOrder.deleteAll();

@@ -5,8 +5,8 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:intl/intl.dart';
 
 import 'package:retog/app/models/buyer.dart';
+import 'package:retog/app/models/buyer_goods.dart';
 import 'package:retog/app/models/goods.dart';
-import 'package:retog/app/models/measure.dart';
 import 'package:retog/app/models/partner.dart';
 import 'package:retog/app/models/return_goods.dart';
 import 'package:retog/app/models/return_order.dart';
@@ -23,6 +23,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
+  final double tileTextWidth = 92;
   final TextEditingController _partnerTextController = TextEditingController();
   final TextEditingController _buyerTextController = TextEditingController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -30,7 +31,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Buyer _buyer;
   ReturnOrder _returnOrder = ReturnOrder();
   List<Goods> _allGoods = [];
-  List<Measure> _allMeasures = [];
 
   Widget _buildHeader(BuildContext context) {
     return Container(
@@ -166,7 +166,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           children: <Widget>[
             Row(
               children: <Widget>[
-                SizedBox(width: 80, child: Text('Товар', style: TextStyle(color: Colors.grey))),
+                SizedBox(width: tileTextWidth, child: Text('Товар', style: TextStyle(color: Colors.grey))),
                 Flexible(
                   child: Column(
                     children: <Widget>[
@@ -182,14 +182,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             SizedBox(height: 8),
             Row(
               children: <Widget>[
-                SizedBox(width: 80, child: Text('Состояние', style: TextStyle(color: Colors.grey))),
+                SizedBox(width: tileTextWidth, child: Text('Состояние', style: TextStyle(color: Colors.grey))),
                 Text(returnGoods.isBad != null ? (returnGoods.isBad ? 'Некондиция' : 'Кондиция') : '')
               ]
             ),
             SizedBox(height: 8),
             Row(
               children: <Widget>[
-                SizedBox(width: 80, child: Text('Дата', style: TextStyle(color: Colors.grey))),
+                SizedBox(width: tileTextWidth, child: Text('Дата', style: TextStyle(color: Colors.grey))),
                 Text(returnGoods.productionDate != null ?
                   DateFormat.yMMMd('ru').format(returnGoods.productionDate) :
                   ''
@@ -199,15 +199,16 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             SizedBox(height: 8),
             Row(
               children: <Widget>[
-                SizedBox(width: 80, child: Text('Кол-во', style: TextStyle(color: Colors.grey))),
-                Text(returnGoods.volume != null ? returnGoods.volume.toString() : ''),
-                SizedBox(width: 8),
-                SizedBox(width: 80, child: Text('Ед. изм.', style: TextStyle(color: Colors.grey))),
-                Text(_allMeasures.isNotEmpty && returnGoods.measureId != null ?
-                  _allMeasures.firstWhere((Measure measure) => returnGoods.measureId == measure.id).name :
-                  ''
-                )
+                SizedBox(width: tileTextWidth, child: Text('Кол-во', style: TextStyle(color: Colors.grey))),
+                Text(returnGoods.volume?.toString() ?? ''),
               ]
+            ),
+            SizedBox(height: 8),
+            Row(
+              children: <Widget>[
+                SizedBox(width: tileTextWidth, child: Text('Кол-во (Ю2)', style: TextStyle(color: Colors.grey))),
+                Text(returnGoods.blackVolume?.toString() ?? ''),
+              ],
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -261,12 +262,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     if (returnGoods != null) {
       Navigator.of(context).push(
         MaterialPageRoute(
+          fullscreenDialog: true,
           builder: (BuildContext context) =>
             ReturnGoodsEditPage(
               returnOrder: _returnOrder,
               returnGoods: returnGoods,
-              goodsDict: _allGoods,
-              measureDict: _allMeasures
+              goodsDict: _allGoods
             )
         )
       );
@@ -301,6 +302,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   Future<void> _clear() async {
+    await Future.wait(_returnOrder.returnGoods.map((ReturnGoods returnGoods) async {
+      if (returnGoods.goodsId == null) return;
+
+      BuyerGoods buyerGoods = await BuyerGoods.find(_returnOrder.buyerId, returnGoods.goodsId);
+      buyerGoods.leftVolume += returnGoods.volume;
+      buyerGoods.leftBlackVolume += returnGoods.blackVolume;
+
+      await buyerGoods.update();
+    }));
     await _createReturnOrder();
     setState(() {
       _buyer = null;
@@ -327,7 +337,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       });
       Navigator.pop(context);
       _showMessage('Возвраты успешно созданы');
-      _clear();
+      await _clear();
     } on ApiException catch(e) {
       Navigator.pop(context);
 
@@ -339,8 +349,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   Future<void> _loadData() async {
-    _allMeasures = await Measure.all();
-
     if (User.currentUser.cReturnOrder != null) {
       _returnOrder = await ReturnOrder.find(User.currentUser.cReturnOrder);
       await _returnOrder.loadReturnGoods();
@@ -371,7 +379,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       key: _scaffoldKey,
       persistentFooterButtons: <Widget>[
         FlatButton(
-          onPressed: _clear,
+          onPressed: () async => await _clear(),
           child: Text('Очистить'),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32.0))
         ),

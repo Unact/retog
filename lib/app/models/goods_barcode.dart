@@ -10,11 +10,10 @@ class GoodsBarcode extends DatabaseModel {
 
   String barcode;
   int goodsId;
-  int measureId;
 
   get tableName => _tableName;
 
-  GoodsBarcode({Map<String, dynamic> values, this.barcode, this.goodsId, this.measureId}) {
+  GoodsBarcode({Map<String, dynamic> values, this.barcode, this.goodsId}) {
     if (values != null) build(values);
   }
 
@@ -24,14 +23,12 @@ class GoodsBarcode extends DatabaseModel {
 
     barcode = values['barcode'];
     goodsId = values['goods_id'];
-    measureId = values['measure_id'];
   }
 
   Map<String, dynamic> toMap() {
     Map<String, dynamic> map = Map<String, dynamic>();
     map['barcode'] = barcode;
     map['goods_id'] = goodsId;
-    map['measure_id'] = measureId;
 
     return map;
   }

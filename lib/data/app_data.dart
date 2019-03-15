@@ -24,23 +24,24 @@ class AppData {
 
     dbPath = '$currentPath/$env.db';
 
-    await _setupDatabase();
-    prefs = await SharedPreferences.getInstance();
+    await _setupDataStores();
     dataSync = DataSync();
 
     print('Initialized AppData');
   }
 
-  Future<void> recreateDatabase() async {
+  Future<void> recreateDataStores() async {
+    await prefs.clear();
     await deleteDatabase(dbPath);
-    await _setupDatabase();
+    await _setupDataStores();
   }
 
-  Future<void> _setupDatabase() async {
+  Future<void> _setupDataStores() async {
     int prevVersion = version;
     List<String> schemaExps = (await rootBundle.loadString(schemaPath)).split(';');
     schemaExps.removeLast(); // Уберем перенос строки
 
+    prefs = await SharedPreferences.getInstance();
     db = await openDatabase(dbPath, version: version,
       onCreate: (Database db, int version) async {
         await Future.wait(schemaExps.map((exp) => db.execute(exp)));
@@ -51,7 +52,7 @@ class AppData {
 
     if (prevVersion != version) {
       await db.close();
-      await recreateDatabase();
+      await recreateDataStores();
     } else {
       print('Started database');
     }

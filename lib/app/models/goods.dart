@@ -56,4 +56,14 @@ class Goods extends DatabaseModel {
       order by goods.name
     """)).map((rec) => Goods(values: rec)).toList();
   }
+
+  static Future<Goods> find(int goodsId) async {
+    return (await App.application.data.db.rawQuery("""
+      select
+        goods.*
+      from $_tableName goods
+      where id = $goodsId
+      order by goods.name
+    """)).map((rec) => Goods(values: rec)).first;
+  }
 }

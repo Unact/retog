@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:retog/app/app.dart';
 import 'package:retog/app/models/database_model.dart';
-import 'package:retog/app/models/measure.dart';
 import 'package:retog/app/utils/nullify.dart';
 
 class ReturnGoods extends DatabaseModel {
@@ -10,12 +9,10 @@ class ReturnGoods extends DatabaseModel {
 
   int returnOrderId;
   int goodsId;
-  int measureId;
   int volume;
+  int blackVolume;
   DateTime productionDate;
   bool isBad;
-
-  static const int kDefaultVolume = 1;
 
   get tableName => _tableName;
 
@@ -23,8 +20,8 @@ class ReturnGoods extends DatabaseModel {
     Map<String, dynamic> values,
     this.returnOrderId,
     this.goodsId,
-    this.measureId = Measure.kPieceId,
-    this.volume = kDefaultVolume,
+    this.volume,
+    this.blackVolume,
     this.productionDate,
     this.isBad
   }) {
@@ -37,8 +34,8 @@ class ReturnGoods extends DatabaseModel {
 
     returnOrderId = values['return_order_id'];
     goodsId = values['goods_id'];
-    measureId = values['measure_id'];
     volume = values['volume'];
+    blackVolume = values['black_volume'];
     productionDate = Nullify.parseDate(values['production_date']);
     isBad = Nullify.parseBool(values['is_bad']);
   }
@@ -47,8 +44,8 @@ class ReturnGoods extends DatabaseModel {
     Map<String, dynamic> map = Map<String, dynamic>();
     map['return_order_id'] = returnOrderId;
     map['goods_id'] = goodsId;
-    map['measure_id'] = measureId;
     map['volume'] = volume;
+    map['black_volume'] = blackVolume;
     map['production_date'] = productionDate?.toIso8601String();
     map['is_bad'] = isBad;
 
