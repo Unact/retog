@@ -255,19 +255,19 @@ class _ReturnGoodsEditPageState extends State<ReturnGoodsEditPage> with WidgetsB
   }
 
   Future<void> _loadData() async {
-    volume = widget.returnGoods.volume ?? 0;
-    blackVolume = widget.returnGoods.blackVolume ?? 0;
+    volume = widget.returnGoods.volume;
+    blackVolume = widget.returnGoods.blackVolume;
     productionDate = widget.returnGoods.productionDate;
     isBad = widget.returnGoods.isBad;
 
-    _volumeController.text = volume.toString() ?? '';
-    _blackVolumeController.text = blackVolume.toString() ?? '';
+    _volumeController.text = volume != null ? volume.toString() : '';
+    _blackVolumeController.text = blackVolume != null ? blackVolume.toString() : '';
 
     if (widget.returnGoods.goodsId != null) {
       goods = await Goods.find(widget.returnGoods.goodsId);
       buyerGoods = await BuyerGoods.find(widget.returnOrder.buyerId, widget.returnGoods.goodsId);
-      _leftVolumeController.text = (buyerGoods.leftVolume + volume).toString();
-      _leftBlackVolumeController.text = (buyerGoods.leftBlackVolume + blackVolume).toString();
+      _leftVolumeController.text = (buyerGoods.leftVolume + (volume ?? 0)).toString();
+      _leftBlackVolumeController.text = (buyerGoods.leftBlackVolume + (blackVolume ?? 0)).toString();
     }
 
     if (mounted) {
@@ -302,6 +302,7 @@ class _ReturnGoodsEditPageState extends State<ReturnGoodsEditPage> with WidgetsB
       buyerGoods.leftVolume = currentLeftVolume - volume;
       widget.returnGoods.volume = volume;
     }
+
     if (widget.returnGoods.blackVolume != blackVolume) {
       int currentLeftBlackVolume = buyerGoods.leftBlackVolume + (widget.returnGoods.blackVolume ?? 0);
 
@@ -313,6 +314,7 @@ class _ReturnGoodsEditPageState extends State<ReturnGoodsEditPage> with WidgetsB
       buyerGoods.leftBlackVolume = currentLeftBlackVolume - blackVolume;
       widget.returnGoods.blackVolume = blackVolume;
     }
+
     widget.returnGoods.productionDate = productionDate;
     widget.returnGoods.isBad = isBad;
     widget.returnGoods.goodsId = goods.id;
