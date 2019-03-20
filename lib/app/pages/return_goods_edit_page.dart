@@ -276,6 +276,9 @@ class _ReturnGoodsEditPageState extends State<ReturnGoodsEditPage> with WidgetsB
   }
 
   Future<void> _save() async {
+    volume = volume ?? 0;
+    blackVolume = blackVolume ?? 0;
+
     if (volume == 0 && blackVolume == 0) {
       _showMessage('Указано не верное количество');
       return;
