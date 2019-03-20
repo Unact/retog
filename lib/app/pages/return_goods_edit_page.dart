@@ -331,15 +331,16 @@ class _ReturnGoodsEditPageState extends State<ReturnGoodsEditPage> with WidgetsB
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      persistentFooterButtons: <Widget>[
-        FlatButton(
-          onPressed: _save,
-          child: Text('Сохранить'),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32.0))
-        ),
-      ],
       key: _scaffoldKey,
-      appBar: AppBar(title: Text('Позиция')),
+      appBar: AppBar(
+        title: Text('Позиция'),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.save),
+            onPressed: _save,
+          )
+        ],
+      ),
       body: _buildBody(context)
     );
   }
