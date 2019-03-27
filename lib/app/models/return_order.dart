@@ -3,18 +3,21 @@ import 'dart:async';
 import 'package:retog/app/app.dart';
 import 'package:retog/app/models/database_model.dart';
 import 'package:retog/app/models/return_goods.dart';
+import 'package:retog/app/utils/nullify.dart';
 
 class ReturnOrder extends DatabaseModel {
   static String _tableName = 'return_orders';
 
   int buyerId;
+  bool needPickup;
   List<ReturnGoods> returnGoods = [];
 
   get tableName => _tableName;
 
   ReturnOrder({
     Map<String, dynamic> values,
-    this.buyerId
+    this.buyerId,
+    this.needPickup = true
   }) {
     if (values != null) build(values);
   }
@@ -24,11 +27,13 @@ class ReturnOrder extends DatabaseModel {
     super.build(values);
 
     buyerId = values['buyer_id'];
+    needPickup = Nullify.parseBool(values['need_pickup']);
   }
 
   Map<String, dynamic> toMap() {
     Map<String, dynamic> map = Map<String, dynamic>();
     map['buyer_id'] = buyerId;
+    map['need_pickup'] = needPickup;
 
     return map;
   }

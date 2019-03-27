@@ -53,6 +53,7 @@ CREATE TABLE buyer_goods(
 );
 CREATE TABLE return_orders(
     buyer_id INTEGER,
+    need_pickup INTEGER,
 
     local_ts DATETIME DEFAULT CURRENT_TIMESTAMP,
     local_id INTEGER PRIMARY KEY,

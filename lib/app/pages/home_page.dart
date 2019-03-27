@@ -39,7 +39,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       child: Column(
         children: <Widget>[
           _buildPartnerSearch(context),
-          _buildBuyerSearch(context)
+          _buildBuyerSearch(context),
+          _buildPickupCheckBox(context)
         ],
       )
     );
@@ -158,6 +159,28 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       }
     );
   }
+
+  Widget _buildPickupCheckBox(BuildContext context) {
+    ThemeData theme = Theme.of(context);
+
+    return Container(
+      padding: EdgeInsets.all(8),
+      child: Row(
+        children: <Widget>[
+          Text('Самовывоз', style: TextStyle(color: theme.disabledColor, fontSize: 16.0)),
+          Checkbox(
+            value: !_returnOrder.needPickup,
+            onChanged: (bool newValue) async {
+              _returnOrder.needPickup = !newValue;
+              await _returnOrder.update();
+              setState(() {});
+            },
+          ),
+        ]
+      )
+    );
+  }
+
   Widget _buildReturnGoodsTile(BuildContext context, ReturnGoods returnGoods) {
     return Card(
       child: Padding(
