@@ -1,5 +1,9 @@
+import 'dart:io';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:retog/app/app.dart';
 import 'package:retog/app/models/user.dart';
@@ -59,6 +63,18 @@ class _PersonPageState extends State<PersonPage> {
     }
   }
 
+  Future<void> _launchAppUpdate() async {
+    String androidUpdateUrl = 'https://github.com/Unact/retog/releases/download/${Api.workingVersion}/app-release.apk';
+    String iosUpdateUrl = 'itms-services://?action=download-manifest&url=https://unact.github.io/mobile_apps/retog/manifest.plist';
+    String url = Platform.isIOS ? iosUpdateUrl : androidUpdateUrl;
+
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      _showMessage('Произошла ошибка');
+    }
+  }
+
   void _showMessage(String content) {
     _scaffoldKey.currentState?.showSnackBar(SnackBar(content: Text(content)));
   }
@@ -75,6 +91,25 @@ class _PersonPageState extends State<PersonPage> {
     );
   }
 
+  Widget _buildUpdateAppButton(BuildContext context) {
+    if (Api.workingVersion != null && Api.workingVersion != App.application.config.packageInfo.version)
+      return Padding(
+        padding: EdgeInsets.only(top: 16.0, bottom: 16.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            RaisedButton(
+              onPressed: _launchAppUpdate,
+              child: Text('Обновить приложение'),
+            )
+          ],
+        )
+      );
+
+    return Container();
+  }
+
   Widget _buildBody(BuildContext context) {
     DateTime lastSyncTime = App.application.data.dataSync.lastSyncTime;
     String lastSyncTimeText = lastSyncTime != null ?
@@ -89,6 +124,7 @@ class _PersonPageState extends State<PersonPage> {
             _buildInfoRow('Логин', User.currentUser.username),
             _buildInfoRow('Версия', App.application.config.packageInfo.version),
             _buildInfoRow('Обновление БД', lastSyncTimeText),
+            _buildUpdateAppButton(context),
             Padding(
               padding: EdgeInsets.only(top: 16.0, bottom: 16.0),
               child: Row(

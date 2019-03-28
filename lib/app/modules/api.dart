@@ -11,6 +11,7 @@ class Api {
   static final JsonDecoder _decoder = JsonDecoder();
   static final JsonEncoder _encoder = JsonEncoder();
   static final httpClient = http.Client();
+  static String workingVersion;
 
   static Future<dynamic> _sendRawRequest(
     String httpMethod,
@@ -117,6 +118,11 @@ class Api {
         throw AuthException(parsedResp['error']);
       }
 
+      if (statusCode == 410) {
+        workingVersion = parsedResp['working_version'];
+        throw VersionException(parsedResp['error']);
+      }
+
       if (statusCode >= 400) {
         throw ApiException(parsedResp['error'], statusCode);
       }
@@ -134,6 +140,10 @@ class ApiException implements Exception {
 
 class AuthException extends ApiException {
   AuthException(errorMsg) : super(errorMsg, 401);
+}
+
+class VersionException extends ApiException {
+  VersionException(errorMsg) : super(errorMsg, 410);
 }
 
 class ServerException extends ApiException {

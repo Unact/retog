@@ -18,6 +18,8 @@ PODS:
   - sqflite (0.0.1):
     - Flutter
     - FMDB (~> 2.7.2)
+  - url_launcher (0.0.1):
+    - Flutter
 
 DEPENDENCIES:
   - barcode_scan (from `.symlinks/plugins/barcode_scan/ios`)
@@ -27,6 +29,7 @@ DEPENDENCIES:
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
   - sqflite (from `.symlinks/plugins/sqflite/ios`)
+  - url_launcher (from `.symlinks/plugins/url_launcher/ios`)
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
@@ -48,6 +51,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/shared_preferences/ios"
   sqflite:
     :path: ".symlinks/plugins/sqflite/ios"
+  url_launcher:
+    :path: ".symlinks/plugins/url_launcher/ios"
 
 SPEC CHECKSUMS:
   barcode_scan: 8288e70cb430072003bce2c794a1431e7adbcb4d
@@ -59,6 +64,7 @@ SPEC CHECKSUMS:
   path_provider: 09407919825bfe3c2deae39453b7a5b44f467873
   shared_preferences: 5a1d487c427ee18fcd3ea1f2a131569481834b53
   sqflite: d1612813fa7db7c667bed9f1d1b508deffc56999
+  url_launcher: 92b89c1029a0373879933c21642958c874539095
 
 PODFILE CHECKSUM: aff02bfeed411c636180d6812254b2daeea14d09
 

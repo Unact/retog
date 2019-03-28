@@ -23,6 +23,7 @@ dependencies:
   package_info: any
   flutter_typeahead: any
   flutter_sticky_header: any
+  url_launcher: any
 
 dev_dependencies:
   flutter_test:
