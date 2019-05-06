@@ -40,7 +40,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         children: <Widget>[
           _buildPartnerSearch(context),
           _buildBuyerSearch(context),
-          _buildPickupCheckBox(context)
+          _buildPickupCheckBox(context),
+          _buildUkdCheckBox(context)
         ],
       )
     );
@@ -164,14 +165,35 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     ThemeData theme = Theme.of(context);
 
     return Container(
-      padding: EdgeInsets.all(8),
+      padding: EdgeInsets.only(left: 8),
       child: Row(
         children: <Widget>[
-          Text('Самовывоз', style: TextStyle(color: theme.disabledColor, fontSize: 16.0)),
+          Expanded(child: Text('Самовывоз', style: TextStyle(color: theme.disabledColor, fontSize: 16.0))),
           Checkbox(
             value: !_returnOrder.needPickup,
             onChanged: (bool newValue) async {
               _returnOrder.needPickup = !newValue;
+              await _returnOrder.update();
+              setState(() {});
+            },
+          ),
+        ]
+      )
+    );
+  }
+
+  Widget _buildUkdCheckBox(BuildContext context) {
+    ThemeData theme = Theme.of(context);
+
+    return Container(
+      padding: EdgeInsets.only(left: 8),
+      child: Row(
+        children: <Widget>[
+          Expanded(child: Text('УКД', style: TextStyle(color: theme.disabledColor, fontSize: 16.0))),
+          Checkbox(
+            value: _returnOrder.isUkd,
+            onChanged: (bool newValue) async {
+              _returnOrder.isUkd = newValue;
               await _returnOrder.update();
               setState(() {});
             },

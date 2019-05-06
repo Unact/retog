@@ -10,6 +10,7 @@ class ReturnOrder extends DatabaseModel {
 
   int buyerId;
   bool needPickup;
+  bool isUkd;
   List<ReturnGoods> returnGoods = [];
 
   get tableName => _tableName;
@@ -17,7 +18,8 @@ class ReturnOrder extends DatabaseModel {
   ReturnOrder({
     Map<String, dynamic> values,
     this.buyerId,
-    this.needPickup = true
+    this.needPickup = true,
+    this.isUkd = false
   }) {
     if (values != null) build(values);
   }
@@ -28,12 +30,14 @@ class ReturnOrder extends DatabaseModel {
 
     buyerId = values['buyer_id'];
     needPickup = Nullify.parseBool(values['need_pickup']);
+    isUkd = Nullify.parseBool(values['is_ukd']);
   }
 
   Map<String, dynamic> toMap() {
     Map<String, dynamic> map = Map<String, dynamic>();
     map['buyer_id'] = buyerId;
     map['need_pickup'] = needPickup;
+    map['is_ukd'] = isUkd;
 
     return map;
   }
