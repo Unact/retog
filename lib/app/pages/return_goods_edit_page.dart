@@ -30,9 +30,7 @@ class _ReturnGoodsEditPageState extends State<ReturnGoodsEditPage> with WidgetsB
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   TextEditingController _goodsController = TextEditingController();
   TextEditingController _volumeController = TextEditingController();
-  TextEditingController _blackVolumeController = TextEditingController();
   TextEditingController _leftVolumeController = TextEditingController();
-  TextEditingController _leftBlackVolumeController = TextEditingController();
   BuyerGoods buyerGoods;
   bool isBad;
   DateTime productionDate;
@@ -78,9 +76,7 @@ class _ReturnGoodsEditPageState extends State<ReturnGoodsEditPage> with WidgetsB
         );
       },
       suggestionsCallback: (String value) async {
-        return (await Goods.byBuyer(widget.returnOrder.buyerId)).where(
-          (Goods goods) => goods.name.toLowerCase().contains(value.toLowerCase())
-        ).toList();
+        return widget.goodsDict.where((Goods goods) => goods.name.toLowerCase().contains(value.toLowerCase())).toList();
       },
       itemBuilder: (BuildContext ctx, Goods suggestion) {
         return ListTile(
@@ -92,8 +88,9 @@ class _ReturnGoodsEditPageState extends State<ReturnGoodsEditPage> with WidgetsB
         goods = suggestion;
         buyerGoods = await BuyerGoods.find(widget.returnOrder.buyerId, suggestion.id);
 
-        _leftVolumeController.text = buyerGoods.leftVolume.toString();
-        _leftBlackVolumeController.text = buyerGoods.leftBlackVolume.toString();
+        _leftVolumeController.text = widget.returnOrder.isBlack ?
+          buyerGoods.leftBlackVolume.toString() :
+          buyerGoods.leftVolume.toString();
       }
     );
   }
@@ -151,17 +148,6 @@ class _ReturnGoodsEditPageState extends State<ReturnGoodsEditPage> with WidgetsB
     );
   }
 
-  Widget _buildLeftBlackVolumeField(BuildContext context) {
-    return TextField(
-      controller: _leftBlackVolumeController,
-      enabled: false,
-      decoration: InputDecoration(
-        contentPadding: EdgeInsets.all(8),
-        labelText: 'Продано (Ю2)'
-      )
-    );
-  }
-
   Widget _buildVolumeField(BuildContext context) {
     return TextField(
       controller: _volumeController,
@@ -177,21 +163,6 @@ class _ReturnGoodsEditPageState extends State<ReturnGoodsEditPage> with WidgetsB
     );
   }
 
-  Widget _buildBlackVolumeField(BuildContext context) {
-    return TextField(
-      controller: _blackVolumeController,
-      keyboardType: TextInputType.number,
-      decoration: InputDecoration(
-        contentPadding: EdgeInsets.all(8),
-        labelText: 'Возврат (Ю2)'
-      ),
-      onChanged: (String value) async {
-        blackVolume = int.tryParse(value) ?? 0;
-        setState(() {});
-      }
-    );
-  }
-
   Widget _buildBody(BuildContext context) {
     return ListView(
       padding: EdgeInsets.all(8),
@@ -199,20 +170,8 @@ class _ReturnGoodsEditPageState extends State<ReturnGoodsEditPage> with WidgetsB
         _buildGoodsSearch(context),
         _buildTypeDropDown(context),
         _buildProductionDate(context),
-        Row(
-          children: <Widget>[
-            Flexible(child: _buildLeftVolumeField(context)),
-            SizedBox(width: 8,),
-            Flexible(child: _buildLeftBlackVolumeField(context)),
-          ],
-        ),
-        Row(
-          children: <Widget>[
-            Flexible(child: _buildVolumeField(context)),
-            SizedBox(width: 8,),
-            Flexible(child: _buildBlackVolumeField(context))
-          ],
-        ),
+        _buildLeftVolumeField(context),
+        _buildVolumeField(context)
       ]
     );
   }
@@ -256,18 +215,18 @@ class _ReturnGoodsEditPageState extends State<ReturnGoodsEditPage> with WidgetsB
 
   Future<void> _loadData() async {
     volume = widget.returnGoods.volume;
-    blackVolume = widget.returnGoods.blackVolume;
     productionDate = widget.returnGoods.productionDate;
     isBad = widget.returnGoods.isBad;
 
     _volumeController.text = volume != null ? volume.toString() : '';
-    _blackVolumeController.text = blackVolume != null ? blackVolume.toString() : '';
 
     if (widget.returnGoods.goodsId != null) {
       goods = await Goods.find(widget.returnGoods.goodsId);
       buyerGoods = await BuyerGoods.find(widget.returnOrder.buyerId, widget.returnGoods.goodsId);
-      _leftVolumeController.text = (buyerGoods.leftVolume + (volume ?? 0)).toString();
-      _leftBlackVolumeController.text = (buyerGoods.leftBlackVolume + (blackVolume ?? 0)).toString();
+      _leftVolumeController.text = (
+        (widget.returnOrder.isBlack ? buyerGoods.leftBlackVolume : buyerGoods.leftVolume) +
+        (volume ?? 0)
+      ).toString();
     }
 
     if (mounted) {
@@ -295,27 +254,21 @@ class _ReturnGoodsEditPageState extends State<ReturnGoodsEditPage> with WidgetsB
     }
 
     if (widget.returnGoods.volume != volume) {
-      int currentLeftVolume = buyerGoods.leftVolume + (widget.returnGoods.volume ?? 0);
+      int currentLeftVolume = (widget.returnOrder.isBlack ? buyerGoods.leftBlackVolume : buyerGoods.leftVolume) +
+        (widget.returnGoods.volume ?? 0);
 
       if (currentLeftVolume < volume) {
         _showMessage('Возвращаемое кол-во должно быть меньше или равно проданному кол-ву');
         return;
       }
 
-      buyerGoods.leftVolume = currentLeftVolume - volume;
-      widget.returnGoods.volume = volume;
-    }
-
-    if (widget.returnGoods.blackVolume != blackVolume) {
-      int currentLeftBlackVolume = buyerGoods.leftBlackVolume + (widget.returnGoods.blackVolume ?? 0);
-
-      if (currentLeftBlackVolume < blackVolume) {
-        _showMessage('Возвращаемое кол-во должно быть меньше или равно проданному кол-ву');
-        return;
+      if (widget.returnOrder.isBlack) {
+        buyerGoods.leftBlackVolume = currentLeftVolume - volume;
+      } else {
+        buyerGoods.leftVolume = currentLeftVolume - volume;
       }
 
-      buyerGoods.leftBlackVolume = currentLeftBlackVolume - blackVolume;
-      widget.returnGoods.blackVolume = blackVolume;
+      widget.returnGoods.volume = volume;
     }
 
     widget.returnGoods.productionDate = productionDate;

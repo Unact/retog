@@ -10,7 +10,6 @@ class ReturnGoods extends DatabaseModel {
   int returnOrderId;
   int goodsId;
   int volume;
-  int blackVolume;
   DateTime productionDate;
   bool isBad;
 
@@ -21,7 +20,6 @@ class ReturnGoods extends DatabaseModel {
     this.returnOrderId,
     this.goodsId,
     this.volume,
-    this.blackVolume,
     this.productionDate,
     this.isBad
   }) {
@@ -35,7 +33,6 @@ class ReturnGoods extends DatabaseModel {
     returnOrderId = values['return_order_id'];
     goodsId = values['goods_id'];
     volume = values['volume'];
-    blackVolume = values['black_volume'];
     productionDate = Nullify.parseDate(values['production_date']);
     isBad = Nullify.parseBool(values['is_bad']);
   }
@@ -45,7 +42,6 @@ class ReturnGoods extends DatabaseModel {
     map['return_order_id'] = returnOrderId;
     map['goods_id'] = goodsId;
     map['volume'] = volume;
-    map['black_volume'] = blackVolume;
     map['production_date'] = productionDate?.toIso8601String();
     map['is_bad'] = isBad;
 

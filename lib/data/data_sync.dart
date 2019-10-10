@@ -10,6 +10,7 @@ import 'package:retog/app/models/goods_barcode.dart';
 import 'package:retog/app/models/partner.dart';
 import 'package:retog/app/models/return_goods.dart';
 import 'package:retog/app/models/return_order.dart';
+import 'package:retog/app/models/return_type.dart';
 import 'package:retog/app/modules/api.dart';
 
 class DataSync {
@@ -28,6 +29,7 @@ class DataSync {
     await Goods.import(data['goods'], batch);
     await GoodsBarcode.import(data['goods_barcodes'], batch);
     await Partner.import(data['partners'], batch);
+    await ReturnType.import(data['returnTypes'], batch);
     await batch.commit();
     lastSyncTime = DateTime.now();
   }
@@ -40,6 +42,7 @@ class DataSync {
     await Partner.deleteAll();
     await ReturnGoods.deleteAll();
     await ReturnOrder.deleteAll();
+    await ReturnType.deleteAll();
     lastSyncTime = '';
   }
 }

@@ -4,12 +4,14 @@ import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:intl/intl.dart';
 
+import 'package:retog/app/app.dart';
 import 'package:retog/app/models/buyer.dart';
 import 'package:retog/app/models/buyer_goods.dart';
 import 'package:retog/app/models/goods.dart';
 import 'package:retog/app/models/partner.dart';
 import 'package:retog/app/models/return_goods.dart';
 import 'package:retog/app/models/return_order.dart';
+import 'package:retog/app/models/return_type.dart';
 import 'package:retog/app/models/user.dart';
 import 'package:retog/app/modules/api.dart';
 import 'package:retog/app/pages/person_page.dart';
@@ -31,6 +33,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Buyer _buyer;
   ReturnOrder _returnOrder = ReturnOrder();
   List<Goods> _allGoods = [];
+  List<ReturnType> _returnTypes = [];
 
   Widget _buildHeader(BuildContext context) {
     return Container(
@@ -38,10 +41,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       color: Theme.of(context).bottomAppBarColor,
       child: Column(
         children: <Widget>[
-          _buildPartnerSearch(context),
-          _buildBuyerSearch(context),
+          _buildTypeDropdown(context),
           _buildPickupCheckBox(context),
-          _buildUkdCheckBox(context)
+          _buildPartnerSearch(context),
+          _buildBuyerSearch(context)
         ],
       )
     );
@@ -56,7 +59,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       textFieldConfiguration: TextFieldConfiguration(
         cursorColor: theme.textSelectionColor,
         autocorrect: false,
-        enabled: _buyer == null,
+        enabled: _returnOrder.type != null && _returnOrder.returnGoods.isEmpty && _buyer == null,
         controller: _partnerTextController,
         textInputAction: TextInputAction.search,
         decoration: InputDecoration(
@@ -149,7 +152,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         );
       },
       onSuggestionSelected: (Buyer suggestion) async {
-        _allGoods = await Goods.byBuyer(suggestion.id);
+        _allGoods = await Goods.byBuyer(suggestion.id, _returnOrder.isBlack);
 
         _returnOrder.buyerId = suggestion.id;
         await _returnOrder.update();
@@ -182,24 +185,26 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildUkdCheckBox(BuildContext context) {
-    ThemeData theme = Theme.of(context);
+  Widget _buildTypeDropdown(BuildContext context) {
+    return DropdownButtonFormField<ReturnType>(
+      decoration: InputDecoration(
+        contentPadding: EdgeInsets.all(8),
+        labelText: 'Тип'
+      ),
+      value: _returnTypes.firstWhere((returnType) => _returnOrder.type == returnType.id, orElse: () => null),
+      items: _returnTypes.map((ReturnType returnType) {
+        return DropdownMenuItem<ReturnType>(
+          value: returnType,
+          child: Text(returnType.name)
+        );
+      }).toList(),
+      onChanged: (ReturnType value) async {
+        await _clear();
+        _returnOrder.type = value.id;
+        await _returnOrder.update();
 
-    return Container(
-      padding: EdgeInsets.only(left: 8),
-      child: Row(
-        children: <Widget>[
-          Expanded(child: Text('УКД', style: TextStyle(color: theme.disabledColor, fontSize: 16.0))),
-          Checkbox(
-            value: _returnOrder.isUkd,
-            onChanged: (bool newValue) async {
-              _returnOrder.isUkd = newValue;
-              await _returnOrder.update();
-              setState(() {});
-            },
-          ),
-        ]
-      )
+        setState(() {});
+      }
     );
   }
 
@@ -247,13 +252,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 SizedBox(width: tileTextWidth, child: Text('Кол-во', style: TextStyle(color: Colors.grey))),
                 Text(returnGoods.volume?.toString() ?? ''),
               ]
-            ),
-            SizedBox(height: 8),
-            Row(
-              children: <Widget>[
-                SizedBox(width: tileTextWidth, child: Text('Кол-во (Ю2)', style: TextStyle(color: Colors.grey))),
-                Text(returnGoods.blackVolume?.toString() ?? ''),
-              ],
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -325,6 +323,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       return null;
     }
 
+    if (App.application.data.dataSync.lastSyncTime.difference(DateTime.now()).inDays > 0) {
+      _showMessage('Необходимо обновить данные');
+      return null;
+    }
+
     ReturnGoods newReturnGoods = await ReturnGoods(returnOrderId: _returnOrder.localId).insert();
     setState(() {
       _returnOrder.returnGoods.add(newReturnGoods);
@@ -351,8 +354,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       if (returnGoods.goodsId == null) return;
 
       BuyerGoods buyerGoods = await BuyerGoods.find(_returnOrder.buyerId, returnGoods.goodsId);
-      buyerGoods.leftVolume += returnGoods.volume;
-      buyerGoods.leftBlackVolume += returnGoods.blackVolume;
+      if (_returnOrder.isBlack) {
+        buyerGoods.leftBlackVolume += returnGoods.volume;
+      } else {
+        buyerGoods.leftVolume += returnGoods.volume;
+      }
 
       await buyerGoods.update();
     }));
@@ -394,6 +400,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   Future<void> _loadData() async {
+    _returnTypes = await ReturnType.all();
+
     if (User.currentUser.cReturnOrder != null) {
       _returnOrder = await ReturnOrder.find(User.currentUser.cReturnOrder);
       await _returnOrder.loadReturnGoods();
@@ -401,7 +409,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       if (_returnOrder.buyerId != null) {
         _buyer = await Buyer.find(_returnOrder.buyerId);
         _partner = await Partner.find(_buyer.partnerId);
-        _allGoods = await Goods.byBuyer(_buyer.id);
+        _allGoods = await Goods.byBuyer(_buyer.id, _returnOrder.isBlack);
       }
     } else {
       await _createReturnOrder();

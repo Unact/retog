@@ -46,13 +46,15 @@ class Goods extends DatabaseModel {
     return await App.application.data.db.delete(_tableName);
   }
 
-  static Future<List<Goods>> byBuyer(int buyerId) async {
+  static Future<List<Goods>> byBuyer(int buyerId, bool includeBlack) async {
+    String includeSql = includeBlack ? '1 = 1' : 'buyer_goods.left_volume != 0';
+
     return (await App.application.data.db.rawQuery("""
       select
         goods.*
       from $_tableName goods
       join buyer_goods on buyer_goods.goods_id = goods.id
-      where buyer_goods.buyer_id = $buyerId
+      where buyer_goods.buyer_id = $buyerId and $includeSql
       order by goods.name
     """)).map((rec) => Goods(values: rec)).toList();
   }

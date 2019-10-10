@@ -122,6 +122,7 @@ class _PersonPageState extends State<PersonPage> {
         Column(
           children: [
             _buildInfoRow('Логин', User.currentUser.username),
+            _buildInfoRow('ТП', User.currentUser.salesmanName),
             _buildInfoRow('Версия', App.application.config.packageInfo.version),
             _buildInfoRow('Обновление БД', lastSyncTimeText),
             _buildUpdateAppButton(context),

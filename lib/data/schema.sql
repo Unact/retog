@@ -54,7 +54,7 @@ CREATE TABLE buyer_goods(
 CREATE TABLE return_orders(
     buyer_id INTEGER,
     need_pickup INTEGER,
-    is_ukd INTEGER,
+    type INTEGER,
 
     local_ts DATETIME DEFAULT CURRENT_TIMESTAMP,
     local_id INTEGER PRIMARY KEY,
@@ -66,9 +66,18 @@ CREATE TABLE return_goods(
     return_order_id INTEGER,
     goods_id INTEGER,
     volume INTEGER,
-    black_volume INTEGER,
     production_date DATETIME,
     is_bad INTEGER,
+
+    local_ts DATETIME DEFAULT CURRENT_TIMESTAMP,
+    local_id INTEGER PRIMARY KEY,
+    local_inserted INTEGER DEFAULT 0,
+    local_updated INTEGER DEFAULT 0,
+    local_deleted INTEGER DEFAULT 0
+);
+CREATE TABLE return_types(
+    id INTEGER,
+    name TEXT,
 
     local_ts DATETIME DEFAULT CURRENT_TIMESTAMP,
     local_id INTEGER PRIMARY KEY,
