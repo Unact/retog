@@ -34,6 +34,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Buyer _buyer;
   ReturnOrder _returnOrder = ReturnOrder();
   List<Goods> _allGoods = [];
+  List<Goods> _allBuyerGoods = [];
   List<ReturnType> _returnTypes = [];
 
   Widget _buildHeader(BuildContext context) {
@@ -153,7 +154,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         );
       },
       onSuggestionSelected: (Buyer suggestion) async {
-        _allGoods = await Goods.byBuyer(suggestion.id, _returnOrder.isBlack);
+        _allBuyerGoods = await Goods.byBuyer(suggestion.id, _returnOrder.isBlack);
 
         _returnOrder.buyerId = suggestion.id;
         await _returnOrder.update();
@@ -311,7 +312,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             ReturnGoodsEditPage(
               returnOrder: _returnOrder,
               returnGoods: returnGoods,
-              goodsDict: _allGoods
+              goodsDict: _allBuyerGoods
             )
         )
       );
@@ -402,6 +403,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   Future<void> _loadData() async {
     _returnTypes = await ReturnType.all();
+    _allGoods = await Goods.all();
 
     if (User.currentUser.cReturnOrder != null) {
       _returnOrder = await ReturnOrder.find(User.currentUser.cReturnOrder);
@@ -410,7 +412,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       if (_returnOrder.buyerId != null) {
         _buyer = await Buyer.find(_returnOrder.buyerId);
         _partner = await Partner.find(_buyer.partnerId);
-        _allGoods = await Goods.byBuyer(_buyer.id, _returnOrder.isBlack);
+        _allBuyerGoods = await Goods.byBuyer(_buyer.id, _returnOrder.isBlack);
       }
     } else {
       await _createReturnOrder();

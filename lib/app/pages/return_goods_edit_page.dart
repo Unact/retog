@@ -88,9 +88,11 @@ class _ReturnGoodsEditPageState extends State<ReturnGoodsEditPage> with WidgetsB
         goods = suggestion;
         buyerGoods = await BuyerGoods.find(widget.returnOrder.buyerId, suggestion.id);
 
-        _leftVolumeController.text = widget.returnOrder.isBlack ?
-          buyerGoods.leftBlackVolume.toString() :
-          buyerGoods.leftVolume.toString();
+        setState(() {
+          _leftVolumeController.text = widget.returnOrder.isBlack ?
+            buyerGoods.leftBlackVolume.toString() :
+            buyerGoods.leftVolume.toString();
+        });
       }
     );
   }
