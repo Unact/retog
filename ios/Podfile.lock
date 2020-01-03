@@ -11,7 +11,7 @@ PODS:
   - keyboard_visibility (0.5.0):
     - Flutter
     - Reachability
-  - MTBBarcodeScanner (5.0.8)
+  - MTBBarcodeScanner (5.0.11)
   - package_info (0.0.1):
     - Flutter
   - path_provider (0.0.1):
@@ -28,7 +28,7 @@ PODS:
 DEPENDENCIES:
   - barcode_scan (from `.symlinks/plugins/barcode_scan/ios`)
   - device_info (from `.symlinks/plugins/device_info/ios`)
-  - Flutter (from `.symlinks/flutter/ios`)
+  - Flutter (from `Flutter`)
   - keyboard_visibility (from `.symlinks/plugins/keyboard_visibility/ios`)
   - package_info (from `.symlinks/plugins/package_info/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
@@ -48,7 +48,7 @@ EXTERNAL SOURCES:
   device_info:
     :path: ".symlinks/plugins/device_info/ios"
   Flutter:
-    :path: ".symlinks/flutter/ios"
+    :path: Flutter
   keyboard_visibility:
     :path: ".symlinks/plugins/keyboard_visibility/ios"
   package_info:
@@ -68,7 +68,7 @@ SPEC CHECKSUMS:
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   keyboard_visibility: 96a24de806fe6823c3ad956c01ba2ec6d056616f
-  MTBBarcodeScanner: 5b97f10a037e2560ff104da413343c5ce9413911
+  MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb
   package_info: 78cabb3c322943c55d39676f4a5bfc748c01d055
   path_provider: f96fff6166a8867510d2c25fdcc346327cc4b259
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
@@ -76,6 +76,6 @@ SPEC CHECKSUMS:
   sqflite: ff1d9da63c06588cc8d1faf7256d741f16989d5a
   url_launcher: 0067ddb8f10d36786672aa0722a21717dba3a298
 
-PODFILE CHECKSUM: aff02bfeed411c636180d6812254b2daeea14d09
+PODFILE CHECKSUM: 3dbe063e9c90a5d7c9e4e76e70a821b9e2c1d271
 
 COCOAPODS: 1.6.1

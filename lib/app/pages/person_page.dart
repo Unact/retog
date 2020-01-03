@@ -19,7 +19,7 @@ class PersonPage extends StatefulWidget {
 class _PersonPageState extends State<PersonPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  void _logout() async {
+  Future<void> _logout() async {
     try {
       showDialog(
         barrierDismissible: false,
@@ -39,7 +39,7 @@ class _PersonPageState extends State<PersonPage> {
     }
   }
 
-  void _importData() async {
+  Future<void> _importData() async {
     String msg;
 
     try {

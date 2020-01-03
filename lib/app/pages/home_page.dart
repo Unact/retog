@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
@@ -420,10 +421,46 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     }
   }
 
+  Future<void> _backgroundRefresh() async {
+    DateTime now = DateTime.now();
+    DateTime time = App.application.data.dataSync.lastSyncTime ?? now.subtract(Duration(days: 1));
+
+    if (now.year != time.year || now.month != time.month || now.day != time.day) {
+      await _importData();
+    }
+
+    await _loadData();
+  }
+
+  Future<void> _importData() async {
+    String msg;
+
+    try {
+      showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (BuildContext context) => Center(child: CircularProgressIndicator())
+      );
+
+      await App.application.data.dataSync.importData();
+      msg = 'База данных успешно обновлена';
+    } on ApiException catch(e) {
+      msg = e.errorMsg;
+    } catch(e) {
+      msg = 'Произошла ошибка';
+    } finally {
+      Navigator.pop(context);
+      _showMessage(msg);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+
     _loadData();
+    WidgetsBinding.instance.addObserver(this);
+    SchedulerBinding.instance.addPostFrameCallback((_) => _backgroundRefresh());
   }
 
   @override
