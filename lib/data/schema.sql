@@ -85,3 +85,13 @@ CREATE TABLE return_types(
     local_updated INTEGER DEFAULT 0,
     local_deleted INTEGER DEFAULT 0
 );
+CREATE TABLE partner_return_types(
+    partner_id INTEGER,
+    return_type_id INTEGER,
+
+    local_ts DATETIME DEFAULT CURRENT_TIMESTAMP,
+    local_id INTEGER PRIMARY KEY,
+    local_inserted INTEGER DEFAULT 0,
+    local_updated INTEGER DEFAULT 0,
+    local_deleted INTEGER DEFAULT 0
+);

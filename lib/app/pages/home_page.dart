@@ -43,10 +43,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       color: Theme.of(context).bottomAppBarColor,
       child: Column(
         children: <Widget>[
+          _buildPartnerSearch(context),
+          _buildBuyerSearch(context),
           _buildTypeDropdown(context),
           _buildPickupCheckBox(context),
-          _buildPartnerSearch(context),
-          _buildBuyerSearch(context)
         ],
       )
     );
@@ -61,7 +61,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       textFieldConfiguration: TextFieldConfiguration(
         cursorColor: theme.textSelectionColor,
         autocorrect: false,
-        enabled: _returnOrder.type != null && _returnOrder.returnGoods.isEmpty && _buyer == null,
+        enabled: _returnOrder.returnGoods.isEmpty && _buyer == null,
         controller: _partnerTextController,
         textInputAction: TextInputAction.search,
         decoration: InputDecoration(
@@ -99,9 +99,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         );
       },
       onSuggestionSelected: (Partner suggestion) async {
-        setState(() {
-          _partner = suggestion;
-        });
+        _partner = suggestion;
+        _returnTypes = await ReturnType.byPartner(_partner.id);
+        _returnOrder.type = null;
+
+        await _returnOrder.update();
+
+        setState((){});
       }
     );
   }
@@ -201,7 +205,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         );
       }).toList(),
       onChanged: (ReturnType value) async {
-        await _clear();
         _returnOrder.type = value.id;
         await _returnOrder.update();
 
@@ -305,7 +308,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   Future<void> _editReturnGoods(ReturnGoods returnGoods, BuildContext context) async {
     if (returnGoods != null) {
-      Navigator.of(context).push(
+      await Navigator.of(context).push(
         MaterialPageRoute(
           fullscreenDialog: true,
           builder: (BuildContext context) =>
@@ -316,6 +319,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             )
         )
       );
+      setState((){});
     }
   }
 
@@ -364,8 +368,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
       await buyerGoods.update();
     }));
+
     await _createReturnOrder();
     setState(() {
+      _returnTypes = [];
       _buyer = null;
       _partner = null;
     });
@@ -402,7 +408,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   Future<void> _loadData() async {
-    _returnTypes = await ReturnType.all();
     _allGoods = await Goods.all();
 
     if (User.currentUser.cReturnOrder != null) {
@@ -412,6 +417,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       if (_returnOrder.buyerId != null) {
         _buyer = await Buyer.find(_returnOrder.buyerId);
         _partner = await Partner.find(_buyer.partnerId);
+        _returnTypes = await ReturnType.byPartner(_buyer.partnerId);
         _allBuyerGoods = await Goods.byBuyer(_buyer.id, _returnOrder.isBlack);
       }
     } else {

@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:retog/app/app.dart';
 import 'package:retog/app/models/user.dart';
 import 'package:retog/app/modules/api.dart';
+import 'package:retog/app/pages/login_page.dart';
 
 class PersonPage extends StatefulWidget {
   PersonPage({Key key}) : super(key: key);
@@ -32,7 +33,11 @@ class _PersonPageState extends State<PersonPage> {
       await Api.logout();
       await User.currentUser.reset();
       await App.application.data.dataSync.clearData();
-      Navigator.pushNamedAndRemoveUntil(context, '/login', (Route<dynamic> route) => false);
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (BuildContext context) => LoginPage()),
+        (Route<dynamic> route) => false
+      );
     } on ApiException catch(e) {
       Navigator.pop(context);
       _showMessage(e.errorMsg);

@@ -53,4 +53,14 @@ class ReturnType extends DatabaseModel {
   static Future<void> deleteAll() async {
     return await App.application.data.db.delete(_tableName);
   }
+
+  static Future<List<ReturnType>> byPartner(int partnerId) async {
+    return (await App.application.data.db.rawQuery("""
+      select
+        return_types.*
+      from $_tableName return_types
+      join partner_return_types on partner_return_types.return_type_id = return_types.id
+      where partner_return_types.partner_id = $partnerId
+    """)).map((rec) => ReturnType(values: rec)).toList();
+  }
 }
