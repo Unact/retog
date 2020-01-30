@@ -28,8 +28,6 @@ class User {
     cReturnOrder = App.application.data.prefs.getInt('cReturnOrder');
   }
 
-  User._();
-
   static User _currentUser;
   static User get currentUser => _currentUser;
 

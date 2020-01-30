@@ -101,9 +101,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       onSuggestionSelected: (Partner suggestion) async {
         _partner = suggestion;
         _returnTypes = await ReturnType.byPartner(_partner.id);
-        _returnOrder.type = null;
-
-        await _returnOrder.update();
 
         setState((){});
       }
@@ -146,6 +143,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       },
       suggestionsCallback: (String value) async {
         _buyer = null;
+        _returnOrder.type = null;
+
+        await _returnOrder.update();
+        setState(() {});
 
         return (await Buyer.all()).where(
           (Buyer buyer) => buyer.name.toLowerCase().contains(value.toLowerCase()) && buyer.partnerId == _partner.id
@@ -158,8 +159,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         );
       },
       onSuggestionSelected: (Buyer suggestion) async {
-        _allBuyerGoods = await Goods.byBuyer(suggestion.id, _returnOrder.isBlack);
-
         _returnOrder.buyerId = suggestion.id;
         await _returnOrder.update();
 
@@ -204,9 +203,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           child: Text(returnType.name)
         );
       }).toList(),
-      onChanged: (ReturnType value) async {
+      onChanged: _buyer == null ? null : (ReturnType value) async {
         _returnOrder.type = value.id;
         await _returnOrder.update();
+
+        _allBuyerGoods = await Goods.byBuyer(_buyer.id, _returnOrder.isBlack);
 
         setState(() {});
       }
@@ -329,6 +330,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       return null;
     }
 
+    if (_returnOrder.type == null) {
+      _showMessage('Не выбран тип');
+      return null;
+    }
+
     if (App.application.data.dataSync.lastSyncTime.difference(DateTime.now()).inDays > 0) {
       _showMessage('Необходимо обновить данные');
       return null;
@@ -418,7 +424,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         _buyer = await Buyer.find(_returnOrder.buyerId);
         _partner = await Partner.find(_buyer.partnerId);
         _returnTypes = await ReturnType.byPartner(_buyer.partnerId);
-        _allBuyerGoods = await Goods.byBuyer(_buyer.id, _returnOrder.isBlack);
+
+        if (_returnOrder.type != null) {
+          _allBuyerGoods = await Goods.byBuyer(_buyer.id, _returnOrder.isBlack);
+        }
       }
     } else {
       await _createReturnOrder();
