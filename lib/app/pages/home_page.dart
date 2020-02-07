@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 
 import 'package:retog/app/app.dart';
 import 'package:retog/app/models/buyer.dart';
-import 'package:retog/app/models/buyer_goods.dart';
+import 'package:retog/app/models/goods_barcode.dart';
 import 'package:retog/app/models/goods.dart';
 import 'package:retog/app/models/partner.dart';
 import 'package:retog/app/models/return_goods.dart';
@@ -34,7 +34,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Buyer _buyer;
   ReturnOrder _returnOrder = ReturnOrder();
   List<Goods> _allGoods = [];
-  List<Goods> _allBuyerGoods = [];
   List<ReturnType> _returnTypes = [];
 
   Widget _buildHeader(BuildContext context) {
@@ -204,12 +203,34 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         );
       }).toList(),
       onChanged: _buyer == null ? null : (ReturnType value) async {
-        _returnOrder.type = value.id;
-        await _returnOrder.update();
+        String msg;
 
-        _allBuyerGoods = await Goods.byBuyer(_buyer.id, _returnOrder.isBlack);
+        await Future.forEach(_returnOrder.returnGoods, (element) async => await _removeReturnGoods(element));
+        setState(() => _returnOrder.returnGoods.clear());
 
-        setState(() {});
+        try {
+          showDialog(
+            barrierDismissible: false,
+            context: context,
+            builder: (BuildContext context) => Center(child: CircularProgressIndicator())
+          );
+
+          await App.application.data.dataSync.loadGoodsData(_buyer.id, value.id);
+          _allGoods = await Goods.all();
+
+          msg = 'Загружены товары покупателя';
+          _returnOrder.type = value.id;
+        } on ApiException catch(e) {
+          msg = e.errorMsg;
+        } catch(e) {
+          msg = 'Произошла ошибка';
+        } finally {
+          await _returnOrder.update();
+          setState((){
+            Navigator.pop(context);
+            _showMessage(msg);
+          });
+        }
       }
     );
   }
@@ -264,11 +285,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               children: <Widget>[
                 IconButton(
                   icon: Icon(Icons.edit),
-                  onPressed: () async => _editReturnGoods(returnGoods, context)
+                  onPressed: () async => await _editReturnGoods(returnGoods, context)
                 ),
                 IconButton(
                   icon: Icon(Icons.delete, color: Colors.red,),
-                  onPressed: () async => _removeReturnGoods(returnGoods)
+                  onPressed: () async {
+                    await _removeReturnGoods(returnGoods);
+
+                    setState(() => _returnOrder.returnGoods.remove(returnGoods));
+                  }
                 )
               ],
             )
@@ -312,12 +337,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       await Navigator.of(context).push(
         MaterialPageRoute(
           fullscreenDialog: true,
-          builder: (BuildContext context) =>
-            ReturnGoodsEditPage(
-              returnOrder: _returnOrder,
-              returnGoods: returnGoods,
-              goodsDict: _allBuyerGoods
-            )
+          builder: (BuildContext context) => ReturnGoodsEditPage(returnGoods: returnGoods, allGoods: _allGoods)
         )
       );
       setState((){});
@@ -349,10 +369,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   Future<void> _removeReturnGoods(ReturnGoods returnGoods) async {
+    if (returnGoods.goodsId != null) {
+      Goods goods = _allGoods.firstWhere((Goods goods) => goods.id == returnGoods.goodsId);
+      goods.leftVolume += returnGoods.volume;
+
+      await goods.update();
+    }
+
     await returnGoods.delete();
-    setState(() {
-      _returnOrder.returnGoods.remove(returnGoods);
-    });
   }
 
   Future<void> _createReturnOrder() async {
@@ -362,19 +386,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   Future<void> _clear() async {
-    await Future.wait(_returnOrder.returnGoods.map((ReturnGoods returnGoods) async {
-      if (returnGoods.goodsId == null) return;
-
-      BuyerGoods buyerGoods = await BuyerGoods.find(_returnOrder.buyerId, returnGoods.goodsId);
-      if (_returnOrder.isBlack) {
-        buyerGoods.leftBlackVolume += returnGoods.volume;
-      } else {
-        buyerGoods.leftVolume += returnGoods.volume;
-      }
-
-      await buyerGoods.update();
-    }));
-
+    await Goods.deleteAll();
+    await GoodsBarcode.deleteAll();
     await _createReturnOrder();
     setState(() {
       _returnTypes = [];
@@ -396,7 +409,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         builder: (BuildContext context) => Center(child: CircularProgressIndicator())
       );
 
-      await Api.post('v2/retog/save', body: {
+      await Api.post('v2/retog/save', data: {
         'return_order': _returnOrder.toExportMap(),
         'return_goods': _returnOrder.returnGoods.map((ReturnGoods returnGoods) => returnGoods.toExportMap()).toList()
       });
@@ -424,10 +437,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         _buyer = await Buyer.find(_returnOrder.buyerId);
         _partner = await Partner.find(_buyer.partnerId);
         _returnTypes = await ReturnType.byPartner(_buyer.partnerId);
-
-        if (_returnOrder.type != null) {
-          _allBuyerGoods = await Goods.byBuyer(_buyer.id, _returnOrder.isBlack);
-        }
       }
     } else {
       await _createReturnOrder();
@@ -492,7 +501,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         ),
         SizedBox(width: 24),
         FlatButton(
-          onPressed: () async => _editReturnGoods(await _addReturnGoods(), context),
+          onPressed: () async => await _editReturnGoods(await _addReturnGoods(), context),
           child: Text('Добавить'),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32.0))
         ),

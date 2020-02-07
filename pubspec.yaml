@@ -10,10 +10,10 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+  dio: any
   cupertino_icons: any
   path_provider: any
   sqflite: any
-  http: any
   intl: any
   barcode_scan: any
   sentry: any

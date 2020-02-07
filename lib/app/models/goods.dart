@@ -10,6 +10,7 @@ class Goods extends DatabaseModel {
 
   int id;
   String name;
+  int leftVolume;
 
   get tableName => _tableName;
 
@@ -23,12 +24,14 @@ class Goods extends DatabaseModel {
 
     id = values['id'];
     name = values['name'];
+    leftVolume = values['left_volume'];
   }
 
   Map<String, dynamic> toMap() {
     Map<String, dynamic> map = Map<String, dynamic>();
     map['id'] = id;
     map['name'] = name;
+    map['left_volume'] = leftVolume;
 
     return map;
   }
@@ -44,19 +47,6 @@ class Goods extends DatabaseModel {
 
   static Future<void> deleteAll() async {
     return await App.application.data.db.delete(_tableName);
-  }
-
-  static Future<List<Goods>> byBuyer(int buyerId, bool includeBlack) async {
-    String includeSql = includeBlack ? '1 = 1' : 'buyer_goods.left_volume != 0';
-
-    return (await App.application.data.db.rawQuery("""
-      select
-        goods.*
-      from $_tableName goods
-      join buyer_goods on buyer_goods.goods_id = goods.id
-      where buyer_goods.buyer_id = $buyerId and $includeSql
-      order by goods.name
-    """)).map((rec) => Goods(values: rec)).toList();
   }
 
   static Future<Goods> find(int goodsId) async {

@@ -11,10 +11,6 @@ class ReturnType extends DatabaseModel {
   int id;
   String name;
 
-  static const int kOrdinary = 1;
-  static const int kUkd = 2;
-  static const int kBlack = 3;
-
   get tableName => _tableName;
 
   ReturnType({

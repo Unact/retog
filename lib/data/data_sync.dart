@@ -4,7 +4,6 @@ import 'package:sqflite/sqflite.dart';
 
 import 'package:retog/app/app.dart';
 import 'package:retog/app/models/buyer.dart';
-import 'package:retog/app/models/buyer_goods.dart';
 import 'package:retog/app/models/goods.dart';
 import 'package:retog/app/models/goods_barcode.dart';
 import 'package:retog/app/models/partner_return_type.dart';
@@ -26,9 +25,6 @@ class DataSync {
 
     Batch batch = App.application.data.db.batch();
     await Buyer.import(data['buyers'], batch);
-    await BuyerGoods.import(data['buyer_goods'], batch);
-    await Goods.import(data['goods'], batch);
-    await GoodsBarcode.import(data['goods_barcodes'], batch);
     await Partner.import(data['partners'], batch);
     await PartnerReturnType.import(data['partner_return_types'], batch);
     await ReturnType.import(data['return_types'], batch);
@@ -36,11 +32,20 @@ class DataSync {
     lastSyncTime = DateTime.now();
   }
 
+  Future<void> loadGoodsData(int buyerId, int type) async {
+    Map<String, dynamic> data = await Api.get('v2/retog/buyer_goods', queryParameters: {
+      'buyer_id': buyerId,
+      'type': type
+    });
+
+    Batch batch = App.application.data.db.batch();
+    await Goods.import(data['goods'], batch);
+    await GoodsBarcode.import(data['goods_barcodes'], batch);
+    await batch.commit();
+  }
+
   Future<void> clearData() async {
     await Buyer.deleteAll();
-    await BuyerGoods.deleteAll();
-    await Goods.deleteAll();
-    await GoodsBarcode.deleteAll();
     await Partner.deleteAll();
     await ReturnGoods.deleteAll();
     await ReturnOrder.deleteAll();

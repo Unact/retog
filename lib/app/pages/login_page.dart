@@ -40,7 +40,7 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       await Api.login(_username, _password);
-      Navigator.pushAndRemoveUntil(
+      await Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (BuildContext context) => HomePage()),
         (Route<dynamic> route) => false
@@ -48,6 +48,9 @@ class _LoginPageState extends State<LoginPage> {
     } on ApiException catch(e) {
       Navigator.pop(context);
       _showSnackBar(e.errorMsg);
+    } catch(e) {
+      Navigator.pop(context);
+      _showSnackBar('Произошла ошибка');
     }
   }
 

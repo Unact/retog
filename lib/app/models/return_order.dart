@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:retog/app/app.dart';
 import 'package:retog/app/models/database_model.dart';
 import 'package:retog/app/models/return_goods.dart';
-import 'package:retog/app/models/return_type.dart';
 import 'package:retog/app/utils/nullify.dart';
 
 class ReturnOrder extends DatabaseModel {
@@ -15,8 +14,6 @@ class ReturnOrder extends DatabaseModel {
   List<ReturnGoods> returnGoods = [];
 
   get tableName => _tableName;
-
-  get isBlack => type == ReturnType.kBlack;
 
   ReturnOrder({
     Map<String, dynamic> values,

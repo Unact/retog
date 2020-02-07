@@ -22,6 +22,7 @@ CREATE TABLE buyers(
 CREATE TABLE goods(
     id INTEGER UNIQUE,
     name TEXT,
+    left_volume INTEGER,
 
     local_ts DATETIME DEFAULT CURRENT_TIMESTAMP,
     local_id INTEGER PRIMARY KEY,
@@ -32,18 +33,6 @@ CREATE TABLE goods(
 CREATE TABLE goods_barcodes(
     goods_id INTEGER,
     barcode TEXT,
-
-    local_ts DATETIME DEFAULT CURRENT_TIMESTAMP,
-    local_id INTEGER PRIMARY KEY,
-    local_inserted INTEGER DEFAULT 0,
-    local_updated INTEGER DEFAULT 0,
-    local_deleted INTEGER DEFAULT 0
-);
-CREATE TABLE buyer_goods(
-    goods_id INTEGER,
-    buyer_id INTEGER,
-    left_volume INTEGER,
-    left_black_volume INTEGER,
 
     local_ts DATETIME DEFAULT CURRENT_TIMESTAMP,
     local_id INTEGER PRIMARY KEY,

@@ -3,22 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 
-import 'package:retog/app/models/buyer_goods.dart';
 import 'package:retog/app/models/goods.dart';
 import 'package:retog/app/models/goods_barcode.dart';
 import 'package:retog/app/models/return_goods.dart';
-import 'package:retog/app/models/return_order.dart';
 import 'package:retog/app/widgets/date_picker_widget.dart';
 
 class ReturnGoodsEditPage extends StatefulWidget {
-  final ReturnOrder returnOrder;
   final ReturnGoods returnGoods;
-  final List<Goods> goodsDict;
+  final List<Goods> allGoods;
 
   ReturnGoodsEditPage({
-    @required this.returnOrder,
     @required this.returnGoods,
-    @required this.goodsDict,
+    @required this.allGoods,
     Key key
   }) : super(key: key);
 
@@ -31,11 +27,9 @@ class _ReturnGoodsEditPageState extends State<ReturnGoodsEditPage> with WidgetsB
   TextEditingController _goodsController = TextEditingController();
   TextEditingController _volumeController = TextEditingController();
   TextEditingController _leftVolumeController = TextEditingController();
-  BuyerGoods buyerGoods;
   bool isBad;
   DateTime productionDate;
   int volume;
-  int blackVolume;
   Goods goods;
 
   Widget _buildGoodsSearch(BuildContext context) {
@@ -76,7 +70,9 @@ class _ReturnGoodsEditPageState extends State<ReturnGoodsEditPage> with WidgetsB
         );
       },
       suggestionsCallback: (String value) async {
-        return widget.goodsDict.where((Goods goods) => goods.name.toLowerCase().contains(value.toLowerCase())).toList();
+        return widget.allGoods.
+          where((Goods goods) => goods.leftVolume > 0).
+          where((Goods goods) => goods.name.toLowerCase().contains(value.toLowerCase())).toList();
       },
       itemBuilder: (BuildContext ctx, Goods suggestion) {
         return ListTile(
@@ -86,12 +82,9 @@ class _ReturnGoodsEditPageState extends State<ReturnGoodsEditPage> with WidgetsB
       },
       onSuggestionSelected: (Goods suggestion) async {
         goods = suggestion;
-        buyerGoods = await BuyerGoods.find(widget.returnOrder.buyerId, suggestion.id);
 
         setState(() {
-          _leftVolumeController.text = widget.returnOrder.isBlack ?
-            buyerGoods.leftBlackVolume.toString() :
-            buyerGoods.leftVolume.toString();
+          _leftVolumeController.text = goods.leftVolume.toString();
         });
       }
     );
@@ -186,7 +179,9 @@ class _ReturnGoodsEditPageState extends State<ReturnGoodsEditPage> with WidgetsB
 
       if (barcodes.isNotEmpty) {
         GoodsBarcode firstRec = barcodes.first;
-        Goods foundGoods = widget.goodsDict.firstWhere((Goods goods) => goods.id == firstRec.goodsId, orElse: () => null);
+        Goods foundGoods = widget.allGoods.firstWhere(
+          (Goods goods) => goods.id == firstRec.goodsId, orElse: () => null
+        );
 
         if (goods == null) {
           errorMsg = 'Покупателю указанный товар не отгружался';
@@ -215,7 +210,7 @@ class _ReturnGoodsEditPageState extends State<ReturnGoodsEditPage> with WidgetsB
     _scaffoldKey.currentState?.showSnackBar(SnackBar(content: Text(content)));
   }
 
-  Future<void> _loadData() async {
+  void _loadData() {
     volume = widget.returnGoods.volume;
     productionDate = widget.returnGoods.productionDate;
     isBad = widget.returnGoods.isBad;
@@ -223,12 +218,8 @@ class _ReturnGoodsEditPageState extends State<ReturnGoodsEditPage> with WidgetsB
     _volumeController.text = volume != null ? volume.toString() : '';
 
     if (widget.returnGoods.goodsId != null) {
-      goods = await Goods.find(widget.returnGoods.goodsId);
-      buyerGoods = await BuyerGoods.find(widget.returnOrder.buyerId, widget.returnGoods.goodsId);
-      _leftVolumeController.text = (
-        (widget.returnOrder.isBlack ? buyerGoods.leftBlackVolume : buyerGoods.leftVolume) +
-        (volume ?? 0)
-      ).toString();
+      goods = widget.allGoods.firstWhere((element) => element.id == widget.returnGoods.goodsId);
+      _leftVolumeController.text = (goods.leftVolume + (volume ?? 0)).toString();
     }
 
     if (mounted) {
@@ -238,9 +229,8 @@ class _ReturnGoodsEditPageState extends State<ReturnGoodsEditPage> with WidgetsB
 
   Future<void> _save() async {
     volume = volume ?? 0;
-    blackVolume = blackVolume ?? 0;
 
-    if (volume == 0 && blackVolume == 0) {
+    if (volume == 0) {
       _showMessage('Указано не верное количество');
       return;
     }
@@ -256,20 +246,14 @@ class _ReturnGoodsEditPageState extends State<ReturnGoodsEditPage> with WidgetsB
     }
 
     if (widget.returnGoods.volume != volume) {
-      int currentLeftVolume = (widget.returnOrder.isBlack ? buyerGoods.leftBlackVolume : buyerGoods.leftVolume) +
-        (widget.returnGoods.volume ?? 0);
+      int currentLeftVolume = goods.leftVolume + (widget.returnGoods.volume ?? 0);
 
       if (currentLeftVolume < volume) {
         _showMessage('Возвращаемое кол-во должно быть меньше или равно проданному кол-ву');
         return;
       }
 
-      if (widget.returnOrder.isBlack) {
-        buyerGoods.leftBlackVolume = currentLeftVolume - volume;
-      } else {
-        buyerGoods.leftVolume = currentLeftVolume - volume;
-      }
-
+      goods.leftVolume = currentLeftVolume - volume;
       widget.returnGoods.volume = volume;
     }
 
@@ -278,7 +262,7 @@ class _ReturnGoodsEditPageState extends State<ReturnGoodsEditPage> with WidgetsB
     widget.returnGoods.goodsId = goods.id;
 
     await widget.returnGoods.update();
-    await buyerGoods.update();
+    await goods.update();
     Navigator.of(context).pop();
   }
 
