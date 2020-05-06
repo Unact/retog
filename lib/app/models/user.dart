@@ -48,7 +48,7 @@ class User {
   }
 
   Future<void> loadDataFromRemote() async {
-    Map<String, dynamic> userData = await Api.get('v2/retog/user_info');
+    Map<String, dynamic> userData = await Api.get('v1/retog/user_info');
 
     id = userData['id'];
     email = userData['email'];

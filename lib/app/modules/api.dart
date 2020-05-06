@@ -14,7 +14,7 @@ class Api {
       'POST',
       'v1/reset_password',
       headers: {
-        'Authorization': 'RApi client_id=${App.application.config.clientId},login=$username'
+        'Authorization': 'Renew client_id=${App.application.config.clientId},login=$username'
       }
     );
   }
@@ -98,7 +98,7 @@ class Api {
 
     if (User.currentUser.token != null) {
       headers.addAll({
-        'Authorization': 'RApi client_id=${App.application.config.clientId},token=${User.currentUser.token}'
+        'Authorization': 'Renew client_id=${App.application.config.clientId},token=${User.currentUser.token}'
       });
     }
 
@@ -185,7 +185,7 @@ class Api {
       'POST',
       'v1/authenticate',
       headers: {
-        'Authorization': 'RApi client_id=${App.application.config.clientId},login=$username,password=$password'
+        'Authorization': 'Renew client_id=${App.application.config.clientId},login=$username,password=$password'
       }
     );
     User.currentUser.token = response['token'];

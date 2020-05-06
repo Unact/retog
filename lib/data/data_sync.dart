@@ -21,7 +21,7 @@ class DataSync {
   set lastSyncTime(val) => App.application.data.prefs.setString('lastSyncTime', val.toString());
 
   Future<void> importData() async {
-    Map<String, dynamic> data = await Api.get('v2/retog');
+    Map<String, dynamic> data = await Api.get('v1/retog');
 
     Batch batch = App.application.data.db.batch();
     await Buyer.import(data['buyers'], batch);
@@ -33,7 +33,7 @@ class DataSync {
   }
 
   Future<void> loadGoodsData(int buyerId, int type) async {
-    Map<String, dynamic> data = await Api.get('v2/retog/buyer_goods', queryParameters: {
+    Map<String, dynamic> data = await Api.get('v1/retog/buyer_goods', queryParameters: {
       'buyer_id': buyerId,
       'type': type
     });
