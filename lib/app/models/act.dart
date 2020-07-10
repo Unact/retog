@@ -5,15 +5,17 @@ import 'package:sqflite/sqflite.dart';
 import 'package:retog/app/app.dart';
 import 'package:retog/app/models/database_model.dart';
 
-class Partner extends DatabaseModel {
-  static String _tableName = 'goods';
+class Act extends DatabaseModel {
+  static String _tableName = 'acts';
 
   int id;
-  String name;
+  int number;
+  String typeName;
+  int goodsCnt;
 
   get tableName => _tableName;
 
-  Partner({Map<String, dynamic> values, this.id, this.name}) {
+  Act({Map<String, dynamic> values, this.id, this.number, this.typeName, this.goodsCnt}) {
     if (values != null) build(values);
   }
 
@@ -22,24 +24,28 @@ class Partner extends DatabaseModel {
     super.build(values);
 
     id = values['id'];
-    name = values['name'];
+    number = values['number'];
+    typeName = values['type_name'];
+    goodsCnt = values['goods_cnt'];
   }
 
   Map<String, dynamic> toMap() {
     Map<String, dynamic> map = Map<String, dynamic>();
     map['id'] = id;
-    map['name'] = name;
+    map['number'] = number;
+    map['type_name'] = typeName;
+    map['goods_cnt'] = goodsCnt;
 
     return map;
   }
 
-  static Future<List<Partner>> all() async {
-    return (await App.application.data.db.query(_tableName)).map((rec) => Partner(values: rec)).toList();
+  static Future<List<Act>> all() async {
+    return (await App.application.data.db.query(_tableName)).map((rec) => Act(values: rec)).toList();
   }
 
   static Future<void> import(List<dynamic> recs, Batch batch) async {
     batch.delete(_tableName);
-    recs.forEach((rec) => batch.insert(_tableName, Partner(values: rec).toMap()));
+    recs.forEach((rec) => batch.insert(_tableName, Act(values: rec).toMap()));
   }
 
   static Future<void> deleteAll() async {

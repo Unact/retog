@@ -44,32 +44,8 @@ class _PersonPageState extends State<PersonPage> {
     }
   }
 
-  Future<void> _importData() async {
-    String msg;
-
-    try {
-      showDialog(
-        barrierDismissible: false,
-        context: context,
-        builder: (BuildContext context) => Center(child: CircularProgressIndicator())
-      );
-
-      await App.application.data.dataSync.importData();
-      msg = 'База данных успешно обновлена';
-    } on ApiException catch(e) {
-      msg = e.errorMsg;
-    } catch(e) {
-      msg = 'Произошла ошибка';
-    } finally {
-      setState((){
-        Navigator.pop(context);
-        _showMessage(msg);
-      });
-    }
-  }
-
   Future<void> _launchAppUpdate() async {
-    String androidUpdateUrl = 'https://github.com/Unact/retog/releases/download/${Api.workingVersion}/app-release.apk';
+    String androidUpdateUrl = 'https://github.com/Unact/retog/releases/download/${User.currentUser.remoteVersion}/app-release.apk';
     String iosUpdateUrl = 'itms-services://?action=download-manifest&url=https://unact.github.io/mobile_apps/retog/manifest.plist';
     String url = Platform.isIOS ? iosUpdateUrl : androidUpdateUrl;
 
@@ -97,22 +73,23 @@ class _PersonPageState extends State<PersonPage> {
   }
 
   Widget _buildUpdateAppButton(BuildContext context) {
-    if (Api.workingVersion != null && Api.workingVersion != App.application.config.packageInfo.version)
-      return Padding(
-        padding: EdgeInsets.only(top: 16.0, bottom: 16.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
+    return Padding(
+      padding: EdgeInsets.only(top: 16.0, bottom: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          User.currentUser.newVersionAvailable ?
             RaisedButton(
-              onPressed: _launchAppUpdate,
               child: Text('Обновить приложение'),
-            )
-          ],
-        )
-      );
-
-    return Container();
+              onPressed: _launchAppUpdate,
+              color: Colors.blueAccent,
+              textColor: Colors.white,
+            ) :
+            Container()
+        ],
+      )
+    );
   }
 
   Widget _buildBody(BuildContext context) {
@@ -128,19 +105,15 @@ class _PersonPageState extends State<PersonPage> {
           children: [
             _buildInfoRow('Логин', User.currentUser.username),
             _buildInfoRow('ТП', User.currentUser.salesmanName),
-            _buildInfoRow('Версия', App.application.config.packageInfo.version),
             _buildInfoRow('Обновление БД', lastSyncTimeText),
+            _buildInfoRow('Версия', App.application.config.packageInfo.version),
             _buildUpdateAppButton(context),
             Padding(
-              padding: EdgeInsets.only(top: 16.0, bottom: 16.0),
+              padding: EdgeInsets.only(top: 8.0, bottom: 16.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  RaisedButton(
-                    onPressed: _importData,
-                    child: Text('Обновить БД'),
-                  ),
                   RaisedButton(
                     color: Colors.red,
                     onPressed: _logout,

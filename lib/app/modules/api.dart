@@ -2,19 +2,18 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:flutter_user_agent/flutter_user_agent.dart';
 
 import 'package:retog/app/app.dart';
 import 'package:retog/app/models/user.dart';
 
 class Api {
-  static String workingVersion;
-
   static Future<void> resetPassword(String username) async {
     await _request(
       'POST',
       'v1/reset_password',
       headers: {
-        'Authorization': 'Renew client_id=${App.application.config.clientId},login=$username'
+        'Authorization': 'Renew login=$username'
       }
     );
   }
@@ -54,10 +53,19 @@ class Api {
       Map<String, String> headers,
       Map<String, dynamic> queryParameters,
       dynamic data,
-      List<File> files = const []
+      File file,
+      String fileKey = 'file'
     }
   ) async {
-    return await request('POST', method, headers: headers, queryParameters: queryParameters, data: data, files: files);
+    return await request(
+      'POST',
+      method,
+      headers: headers,
+      queryParameters: queryParameters,
+      data: data,
+      file: file,
+      fileKey: fileKey
+    );
   }
 
   static Future<dynamic> request(
@@ -67,17 +75,18 @@ class Api {
       Map<String, String> headers,
       Map<String, dynamic> queryParameters,
       dynamic data,
-      List<File>files = const []
+      File file,
+      String fileKey = 'file'
     }
   ) async {
     dynamic dataToSend = data;
 
-    if (data is! Map<String, dynamic> && files.isNotEmpty) {
-      throw 'files not empty, data must be Map<String, dynamic>';
+    if (data is! Map<String, dynamic> && file != null) {
+      throw 'file not empty, data must be Map<String, dynamic>';
     }
 
-    if (files.isNotEmpty) {
-      dataToSend = _createFilesFormData(data, files);
+    if (file != null) {
+      dataToSend = _createFileFormData(data, file, fileKey);
     }
 
     try {
@@ -86,7 +95,7 @@ class Api {
       await relogin();
 
       if (dataToSend is FormData) {
-        dataToSend = _createFilesFormData(data, files);
+        dataToSend = _createFileFormData(data, file, fileKey);
       }
 
       return await _request(method, apiMethod, headers: headers, data: dataToSend, queryParameters: queryParameters);
@@ -94,18 +103,20 @@ class Api {
   }
 
   static Dio _createDio([Map<String, String> headers = const {}]) {
+    String version = App.application.config.packageInfo.version;
+
     if (headers == null) headers = {};
 
     if (User.currentUser.token != null) {
       headers.addAll({
-        'Authorization': 'Renew client_id=${App.application.config.clientId},token=${User.currentUser.token}'
+        'Authorization': 'Renew token=${User.currentUser.token}'
       });
     }
 
     headers.addAll({
-      'Content-Type': 'application/json',
       'Accept': 'application/json',
-      'Retog': '${App.application.config.packageInfo.version}'
+      'Retog': '$version',
+      HttpHeaders.userAgentHeader: 'Retog/$version ${FlutterUserAgent.userAgent}',
     });
 
     return Dio(BaseOptions(
@@ -136,7 +147,6 @@ class Api {
       }
 
       if (statusCode == 410) {
-        workingVersion = body['working_version'];
         throw VersionException(body['error']);
       }
 
@@ -152,11 +162,9 @@ class Api {
     }
   }
 
-  static FormData _createFilesFormData(Map<String, dynamic> data, List<File> files) {
+  static FormData _createFileFormData(Map<String, dynamic> data, File file, String fileKey) {
     Map<String, dynamic> dataToAdd = data;
-    dataToAdd['files'] = files.map(
-      (file) => MultipartFile.fromBytes(file.readAsBytesSync(), filename: file.path.split('/').last)
-    ).toList();
+    dataToAdd[fileKey] = MultipartFile.fromBytes(file.readAsBytesSync(), filename: file.path.split('/').last);
 
     return FormData.fromMap(dataToAdd);
   }
@@ -185,7 +193,7 @@ class Api {
       'POST',
       'v1/authenticate',
       headers: {
-        'Authorization': 'Renew client_id=${App.application.config.clientId},login=$username,password=$password'
+        'Authorization': 'Renew login=$username,password=$password'
       }
     );
     User.currentUser.token = response['token'];

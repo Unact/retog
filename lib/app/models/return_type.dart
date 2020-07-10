@@ -50,13 +50,14 @@ class ReturnType extends DatabaseModel {
     return await App.application.data.db.delete(_tableName);
   }
 
-  static Future<List<ReturnType>> byPartner(int partnerId) async {
+  static Future<List<ReturnType>> byBuyer(int buyerId) async {
     return (await App.application.data.db.rawQuery("""
       select
         return_types.*
       from $_tableName return_types
       join partner_return_types on partner_return_types.return_type_id = return_types.id
-      where partner_return_types.partner_id = $partnerId
+      join buyers on buyers.partner_id = partner_return_types.partner_id
+      where buyers.id = $buyerId
     """)).map((rec) => ReturnType(values: rec)).toList();
   }
 }

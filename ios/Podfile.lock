@@ -7,6 +7,8 @@ PODS:
   - Flutter (1.0.0)
   - flutter_keyboard_visibility (0.7.0):
     - Flutter
+  - flutter_user_agent (1.2.2):
+    - Flutter
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
   - FMDB/standard (2.7.5)
@@ -36,6 +38,7 @@ DEPENDENCIES:
   - device_info (from `.symlinks/plugins/device_info/ios`)
   - Flutter (from `Flutter`)
   - flutter_keyboard_visibility (from `.symlinks/plugins/flutter_keyboard_visibility/ios`)
+  - flutter_user_agent (from `.symlinks/plugins/flutter_user_agent/ios`)
   - package_info (from `.symlinks/plugins/package_info/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
@@ -47,7 +50,7 @@ DEPENDENCIES:
   - url_launcher_web (from `.symlinks/plugins/url_launcher_web/ios`)
 
 SPEC REPOS:
-  https://github.com/cocoapods/specs.git:
+  https://github.com/CocoaPods/Specs.git:
     - FMDB
     - MTBBarcodeScanner
 
@@ -60,6 +63,8 @@ EXTERNAL SOURCES:
     :path: Flutter
   flutter_keyboard_visibility:
     :path: ".symlinks/plugins/flutter_keyboard_visibility/ios"
+  flutter_user_agent:
+    :path: ".symlinks/plugins/flutter_user_agent/ios"
   package_info:
     :path: ".symlinks/plugins/package_info/ios"
   path_provider:
@@ -84,6 +89,7 @@ SPEC CHECKSUMS:
   device_info: cbf09d2ec12aa7110e0b09fabe54b5bd6c8efe74
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   flutter_keyboard_visibility: 6195387fb6d8f46e5cd6dda4a4154e41f800f545
+  flutter_user_agent: 27c45d034dc31b80948d29998cea52cd3a7bf936
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb
   package_info: 48b108e75b8802c2d5e126f208ef540561c98aef
@@ -98,4 +104,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 49ec7d4076524b7e225c38b98147173651ac4b9d
 
-COCOAPODS: 1.6.1
+COCOAPODS: 1.9.1

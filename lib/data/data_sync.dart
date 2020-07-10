@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:sqflite/sqflite.dart';
 
 import 'package:retog/app/app.dart';
+import 'package:retog/app/models/act.dart';
 import 'package:retog/app/models/buyer.dart';
 import 'package:retog/app/models/goods.dart';
 import 'package:retog/app/models/goods_barcode.dart';
@@ -11,6 +12,7 @@ import 'package:retog/app/models/partner.dart';
 import 'package:retog/app/models/return_goods.dart';
 import 'package:retog/app/models/return_order.dart';
 import 'package:retog/app/models/return_type.dart';
+import 'package:retog/app/models/user.dart';
 import 'package:retog/app/modules/api.dart';
 
 class DataSync {
@@ -21,9 +23,12 @@ class DataSync {
   set lastSyncTime(val) => App.application.data.prefs.setString('lastSyncTime', val.toString());
 
   Future<void> importData() async {
+    await User.currentUser.loadDataFromRemote();
+
     Map<String, dynamic> data = await Api.get('v1/retog');
 
     Batch batch = App.application.data.db.batch();
+    await Act.import(data['acts'], batch);
     await Buyer.import(data['buyers'], batch);
     await Partner.import(data['partners'], batch);
     await PartnerReturnType.import(data['partner_return_types'], batch);
@@ -45,6 +50,7 @@ class DataSync {
   }
 
   Future<void> clearData() async {
+    await Act.deleteAll();
     await Buyer.deleteAll();
     await Partner.deleteAll();
     await ReturnGoods.deleteAll();

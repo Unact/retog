@@ -58,4 +58,14 @@ class Buyer extends DatabaseModel {
       order by buyers.name
     """)).map((rec) => Buyer(values: rec)).first;
   }
+
+  static Future<List<Buyer>> byPartnerId(int partnerId) async {
+    return (await App.application.data.db.rawQuery("""
+      select
+        buyers.*
+      from $_tableName buyers
+      where partner_id = $partnerId
+      order by buyers.name
+    """)).map((rec) => Buyer(values: rec)).toList();
+  }
 }

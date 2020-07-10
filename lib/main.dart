@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:device_info/device_info.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_user_agent/flutter_user_agent.dart';
 import 'package:package_info/package_info.dart';
 
 import 'package:retog/app/app.dart';
@@ -20,6 +21,8 @@ void main() async {
 
   // If you're running an application and need to access the binary messenger before `runApp()` has been called (for example, during plugin initialization), then you need to explicitly call the `WidgetsFlutterBinding.ensureInitialized()` first.
   WidgetsFlutterBinding.ensureInitialized();
+
+  await FlutterUserAgent.init();
 
   if (Platform.isIOS) {
     developmentUrl = 'http://localhost:3000';
@@ -43,7 +46,7 @@ void main() async {
     deviceModel: deviceModel,
     osVersion: osVersion,
     env: development ? 'development' : 'production',
-    databaseVersion: 7,
+    databaseVersion: 8,
     apiBaseUrl: '${development ? developmentUrl : 'https://data.unact.ru'}/api/',
     sentryDsn: appEnv['SENTRY_DSN']
   )).run();

@@ -11,6 +11,8 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   dio: any
+  flutter_user_agent: any
+  pub_semver: any
   cupertino_icons: any
   path_provider: any
   sqflite: any
