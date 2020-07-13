@@ -1,6 +1,6 @@
 name: retog
 description: A new Flutter project.
-version: 1.4.1+26
+version: 1.4.1+27
 
 environment:
   sdk: ">=2.1.0 <3.0.0"
