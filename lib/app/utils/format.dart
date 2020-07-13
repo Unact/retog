@@ -30,6 +30,10 @@ class Format {
     }
   }
 
+  static String dateStr(DateTime date) {
+    return DateFormat.yMd('ru').format(date);
+  }
+
   static String timeStr(int minutes) {
     DateTime today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
     DateTime newDate = today.add(Duration(minutes: minutes));

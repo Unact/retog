@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:retog/app/app.dart';
 import 'package:retog/app/models/goods_barcode.dart';
 import 'package:retog/app/models/goods.dart';
+import 'package:retog/app/models/recept.dart';
 import 'package:retog/app/models/return_goods.dart';
 import 'package:retog/app/models/return_order.dart';
 import 'package:retog/app/models/return_type.dart';
@@ -30,7 +31,9 @@ class _ReturnOrderPageState extends State<ReturnOrderPage> {
   final double tileTextWidth = 92;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   List<Goods> _allGoods = [];
+  List<Recept> _recepts = [];
   bool _editable = true;
+  bool _needRecept = false;
 
   ReturnOrder get returnOrder => widget.returnOrder;
 
@@ -40,8 +43,10 @@ class _ReturnOrderPageState extends State<ReturnOrderPage> {
       color: Theme.of(context).bottomAppBarColor,
       child: Column(
         children: <Widget>[
-          _buildTypeDropdown(context),
           _buildPickupCheckBox(context),
+          _buildReceptCheckBox(context),
+          _buildTypeDropdown(context),
+          _buildReceptDropdown(context),
         ],
       )
     );
@@ -68,6 +73,32 @@ class _ReturnOrderPageState extends State<ReturnOrderPage> {
     );
   }
 
+
+  Widget _buildReceptCheckBox(BuildContext context) {
+    ThemeData theme = Theme.of(context);
+
+    return Container(
+      padding: EdgeInsets.only(left: 8),
+      child: Row(
+        children: <Widget>[
+          Expanded(child: Text('Накладная', style: TextStyle(color: theme.disabledColor, fontSize: 16.0))),
+          Checkbox(
+            value: _needRecept,
+            onChanged: (bool newValue) async {
+              returnOrder.type = null;
+              returnOrder.receptId = null;
+              await returnOrder.update();
+
+              setState(() {
+                _needRecept = newValue;
+              });
+            },
+          ),
+        ]
+      )
+    );
+  }
+
   Widget _buildTypeDropdown(BuildContext context) {
     return DropdownButtonFormField<ReturnType>(
       decoration: InputDecoration(
@@ -85,6 +116,10 @@ class _ReturnOrderPageState extends State<ReturnOrderPage> {
         String msg;
 
         await Future.forEach(returnOrder.returnGoods, (element) async => await _removeReturnGoods(element));
+        returnOrder.receptId = null;
+        returnOrder.type = value.id;
+        await returnOrder.update();
+
         setState(() => returnOrder.returnGoods.clear());
 
         try {
@@ -94,11 +129,72 @@ class _ReturnOrderPageState extends State<ReturnOrderPage> {
             builder: (BuildContext context) => Center(child: CircularProgressIndicator())
           );
 
-          await App.application.data.dataSync.loadGoodsData(widget.returnOrder.buyerId, value.id);
+          await App.application.data.dataSync.loadGoodsData(
+            widget.returnOrder.buyerId,
+            value.id,
+            _needRecept,
+            null
+          );
           _allGoods = await Goods.all();
+          _recepts = await Recept.all();
 
           msg = 'Загружены товары покупателя';
-          returnOrder.type = value.id;
+        } on ApiException catch(e) {
+          returnOrder.type = null;
+          msg = e.errorMsg;
+        } catch(e) {
+          msg = 'Произошла ошибка';
+        } finally {
+          await returnOrder.update();
+          setState((){
+            Navigator.pop(context);
+            _showMessage(msg);
+          });
+        }
+      }
+    );
+  }
+
+  Widget _buildReceptDropdown(BuildContext context) {
+    if (!_needRecept) {
+      return Container();
+    }
+
+    return DropdownButtonFormField<Recept>(
+      decoration: InputDecoration(
+        contentPadding: EdgeInsets.all(8),
+        labelText: 'Накладная'
+      ),
+      value: _recepts.firstWhere((recept) => returnOrder.receptId == recept.id, orElse: () => null),
+      items: _recepts.map((Recept recept) {
+        return DropdownMenuItem<Recept>(
+          value: recept,
+          child: Text(recept.name)
+        );
+      }).toList(),
+      onChanged: (Recept value) async {
+        String msg;
+
+        await Future.forEach(returnOrder.returnGoods, (element) async => await _removeReturnGoods(element));
+        setState(() => returnOrder.returnGoods.clear());
+
+        try {
+          showDialog(
+            barrierDismissible: false,
+            context: context,
+            builder: (BuildContext context) => Center(child: CircularProgressIndicator())
+          );
+
+          await App.application.data.dataSync.loadGoodsData(
+            widget.returnOrder.buyerId,
+            returnOrder.type,
+            _needRecept,
+            value.id
+          );
+          _allGoods = await Goods.all();
+
+          msg = 'Загружены товары по накладной';
+          returnOrder.receptId = value.id;
         } on ApiException catch(e) {
           msg = e.errorMsg;
         } catch(e) {
@@ -298,7 +394,9 @@ class _ReturnOrderPageState extends State<ReturnOrderPage> {
   }
 
   Future<void> _loadData() async {
+    _needRecept = widget.returnOrder.receptId != null;
     _allGoods = await Goods.all();
+    _recepts = await Recept.all();
 
     if (mounted) {
       setState(() {});

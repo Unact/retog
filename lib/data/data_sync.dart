@@ -9,6 +9,7 @@ import 'package:retog/app/models/goods.dart';
 import 'package:retog/app/models/goods_barcode.dart';
 import 'package:retog/app/models/partner_return_type.dart';
 import 'package:retog/app/models/partner.dart';
+import 'package:retog/app/models/recept.dart';
 import 'package:retog/app/models/return_goods.dart';
 import 'package:retog/app/models/return_order.dart';
 import 'package:retog/app/models/return_type.dart';
@@ -37,13 +38,16 @@ class DataSync {
     lastSyncTime = DateTime.now();
   }
 
-  Future<void> loadGoodsData(int buyerId, int type) async {
+  Future<void> loadGoodsData(int buyerId, int type, bool needRecept, int receptId) async {
     Map<String, dynamic> data = await Api.get('v1/retog/buyer_goods', queryParameters: {
       'buyer_id': buyerId,
-      'type': type
+      'type': type,
+      'need_recept': needRecept,
+      'recept_id': receptId
     });
 
     Batch batch = App.application.data.db.batch();
+    await Recept.import(data['recepts'], batch);
     await Goods.import(data['goods'], batch);
     await GoodsBarcode.import(data['goods_barcodes'], batch);
     await batch.commit();

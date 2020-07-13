@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:retog/app/models/buyer.dart';
+import 'package:retog/app/models/goods.dart';
+import 'package:retog/app/models/recept.dart';
 import 'package:retog/app/models/return_order.dart';
 import 'package:retog/app/models/return_type.dart';
 import 'package:retog/app/models/user.dart';
@@ -34,6 +36,9 @@ class _BuyersPageState extends State<BuyersPage> with WidgetsBindingObserver {
 
         User.currentUser.cReturnOrder = returnOrder.localId;
         await User.currentUser.save();
+
+        await Recept.deleteAll();
+        await Goods.deleteAll();
 
         Navigator.push(
           context,

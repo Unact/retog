@@ -44,6 +44,7 @@ CREATE TABLE return_orders(
     buyer_id INTEGER,
     need_pickup INTEGER,
     type INTEGER,
+    recept_id INTEGER,
 
     local_ts DATETIME DEFAULT CURRENT_TIMESTAMP,
     local_id INTEGER PRIMARY KEY,
@@ -89,6 +90,17 @@ CREATE TABLE acts(
     number INTEGER,
     type_name TEXT,
     goods_cnt INTEGER,
+
+    local_ts DATETIME DEFAULT CURRENT_TIMESTAMP,
+    local_id INTEGER PRIMARY KEY,
+    local_inserted INTEGER DEFAULT 0,
+    local_updated INTEGER DEFAULT 0,
+    local_deleted INTEGER DEFAULT 0
+);
+CREATE TABLE recepts(
+    id INTEGER UNIQUE,
+    ndoc TEXT,
+    ddate DATE,
 
     local_ts DATETIME DEFAULT CURRENT_TIMESTAMP,
     local_id INTEGER PRIMARY KEY,
