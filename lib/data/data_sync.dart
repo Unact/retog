@@ -38,16 +38,27 @@ class DataSync {
     lastSyncTime = DateTime.now();
   }
 
-  Future<void> loadGoodsData(int buyerId, int type, bool needRecept, int receptId) async {
+  Future<void> loadBuyerData(int buyerId, int type) async {
     Map<String, dynamic> data = await Api.get('v1/retog/buyer_goods', queryParameters: {
       'buyer_id': buyerId,
-      'type': type,
-      'need_recept': needRecept,
-      'recept_id': receptId
+      'type': type
     });
 
     Batch batch = App.application.data.db.batch();
     await Recept.import(data['recepts'], batch);
+    await Goods.import(data['goods'], batch);
+    await GoodsBarcode.import(data['goods_barcodes'], batch);
+    await batch.commit();
+  }
+
+  Future<void> loadReceptData(int buyerId, int type, int receptId) async {
+    Map<String, dynamic> data = await Api.get('v1/retog/recept_goods', queryParameters: {
+      'buyer_id': buyerId,
+      'type': type,
+      'recept_id': receptId
+    });
+
+    Batch batch = App.application.data.db.batch();
     await Goods.import(data['goods'], batch);
     await GoodsBarcode.import(data['goods_barcodes'], batch);
     await batch.commit();

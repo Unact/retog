@@ -33,7 +33,6 @@ class _ReturnOrderPageState extends State<ReturnOrderPage> {
   List<Goods> _allGoods = [];
   List<Recept> _recepts = [];
   bool _editable = true;
-  bool _needRecept = false;
 
   ReturnOrder get returnOrder => widget.returnOrder;
 
@@ -44,7 +43,6 @@ class _ReturnOrderPageState extends State<ReturnOrderPage> {
       child: Column(
         children: <Widget>[
           _buildPickupCheckBox(context),
-          _buildReceptCheckBox(context),
           _buildTypeDropdown(context),
           _buildReceptDropdown(context),
         ],
@@ -66,32 +64,6 @@ class _ReturnOrderPageState extends State<ReturnOrderPage> {
               returnOrder.needPickup = !newValue;
               await returnOrder.update();
               setState(() {});
-            },
-          ),
-        ]
-      )
-    );
-  }
-
-
-  Widget _buildReceptCheckBox(BuildContext context) {
-    ThemeData theme = Theme.of(context);
-
-    return Container(
-      padding: EdgeInsets.only(left: 8),
-      child: Row(
-        children: <Widget>[
-          Expanded(child: Text('Накладная', style: TextStyle(color: theme.disabledColor, fontSize: 16.0))),
-          Checkbox(
-            value: _needRecept,
-            onChanged: (bool newValue) async {
-              returnOrder.type = null;
-              returnOrder.receptId = null;
-              await returnOrder.update();
-
-              setState(() {
-                _needRecept = newValue;
-              });
             },
           ),
         ]
@@ -129,12 +101,7 @@ class _ReturnOrderPageState extends State<ReturnOrderPage> {
             builder: (BuildContext context) => Center(child: CircularProgressIndicator())
           );
 
-          await App.application.data.dataSync.loadGoodsData(
-            widget.returnOrder.buyerId,
-            value.id,
-            _needRecept,
-            null
-          );
+          await App.application.data.dataSync.loadBuyerData(widget.returnOrder.buyerId, value.id);
           _allGoods = await Goods.all();
           _recepts = await Recept.all();
 
@@ -156,10 +123,6 @@ class _ReturnOrderPageState extends State<ReturnOrderPage> {
   }
 
   Widget _buildReceptDropdown(BuildContext context) {
-    if (!_needRecept) {
-      return Container();
-    }
-
     return DropdownButtonFormField<Recept>(
       decoration: InputDecoration(
         contentPadding: EdgeInsets.all(8),
@@ -185,15 +148,14 @@ class _ReturnOrderPageState extends State<ReturnOrderPage> {
             builder: (BuildContext context) => Center(child: CircularProgressIndicator())
           );
 
-          await App.application.data.dataSync.loadGoodsData(
+          await App.application.data.dataSync.loadReceptData(
             widget.returnOrder.buyerId,
-            returnOrder.type,
-            _needRecept,
+            widget.returnOrder.type,
             value.id
           );
           _allGoods = await Goods.all();
 
-          msg = 'Загружены товары по накладной';
+          msg = 'Загружены товары накладной';
           returnOrder.receptId = value.id;
         } on ApiException catch(e) {
           msg = e.errorMsg;
@@ -394,7 +356,6 @@ class _ReturnOrderPageState extends State<ReturnOrderPage> {
   }
 
   Future<void> _loadData() async {
-    _needRecept = widget.returnOrder.receptId != null;
     _allGoods = await Goods.all();
     _recepts = await Recept.all();
 
