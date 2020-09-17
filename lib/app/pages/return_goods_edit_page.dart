@@ -175,7 +175,7 @@ class _ReturnGoodsEditPageState extends State<ReturnGoodsEditPage> with WidgetsB
     String errorMsg;
 
     try {
-      List<GoodsBarcode> barcodes = await GoodsBarcode.byBarcode(await BarcodeScanner.scan());
+      List<GoodsBarcode> barcodes = await GoodsBarcode.byBarcode((await BarcodeScanner.scan()).rawContent);
 
       if (barcodes.isNotEmpty) {
         GoodsBarcode firstRec = barcodes.first;
@@ -196,7 +196,7 @@ class _ReturnGoodsEditPageState extends State<ReturnGoodsEditPage> with WidgetsB
     } on PlatformException catch (e) {
       errorMsg = 'Произошла ошибка';
 
-      if (e.code == BarcodeScanner.CameraAccessDenied) {
+      if (e.code == BarcodeScanner.cameraAccessDenied) {
         errorMsg = 'Необходимо дать доступ к использованию камеры';
       }
     }
