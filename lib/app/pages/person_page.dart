@@ -81,6 +81,7 @@ class _PersonPageState extends State<PersonPage> {
         children: <Widget>[
           User.currentUser.newVersionAvailable ?
             RaisedButton(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
               child: Text('Обновить приложение'),
               onPressed: _launchAppUpdate,
               color: Colors.blueAccent,
@@ -106,7 +107,10 @@ class _PersonPageState extends State<PersonPage> {
             _buildInfoRow('Логин', User.currentUser.username),
             _buildInfoRow('ТП', User.currentUser.salesmanName),
             _buildInfoRow('Обновление БД', lastSyncTimeText),
-            _buildInfoRow('Версия', App.application.config.packageInfo.version),
+            _buildInfoRow(
+              'Версия',
+              App.application.config.packageInfo.version + '+' + App.application.config.packageInfo.buildNumber
+            ),
             _buildUpdateAppButton(context),
             Padding(
               padding: EdgeInsets.only(top: 8.0, bottom: 16.0),
@@ -115,6 +119,7 @@ class _PersonPageState extends State<PersonPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   RaisedButton(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
                     color: Colors.red,
                     onPressed: _logout,
                     child: Text('Выйти', style: TextStyle(color: Colors.white)),
