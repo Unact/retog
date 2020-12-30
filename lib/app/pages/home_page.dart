@@ -24,15 +24,15 @@ class _HomePageState extends State<HomePage> {
       items: [
         BottomNavigationBarItem(
           icon: Icon(Icons.home),
-          title: Text('Главная')
+          label: 'Главная'
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.local_grocery_store),
-          title: Text('Партнеры'),
+          label: 'Партнеры'
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.assignment),
-          title: Text('Акты'),
+          label: 'Акты'
         )
       ],
     );

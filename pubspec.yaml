@@ -18,10 +18,9 @@ dependencies:
   sqflite: any
   intl: any
   barcode_scan: any
-  sentry: any
-  dotenv: any
+  sentry_flutter: any
+  flutter_dotenv: any
   shared_preferences: any
-  device_info: any
   package_info: any
   flutter_typeahead: any
   flutter_sticky_header: any
@@ -36,4 +35,4 @@ flutter:
   uses-material-design: true
   assets:
     - lib/data/schema.sql
-    - .app_env
+    - .env

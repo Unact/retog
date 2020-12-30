@@ -1,20 +1,22 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_user_agent/flutter_user_agent.dart';
+import 'package:package_info/package_info.dart';
+import 'package:sentry_flutter/sentry_flutter.dart' as sentryLib;
 
 import 'package:retog/app/models/user.dart';
-import 'package:retog/app/modules/sentry.dart';
-import 'package:retog/app/pages/home_page.dart';
-import 'package:retog/app/pages/login_page.dart';
 import 'package:retog/config/app_config.dart';
 import 'package:retog/data/app_data.dart';
 
 class App {
-  App.setup(this.config) :
-    data = AppData(config)
-  {
-    _setupEnv();
+  App._({
+    @required this.config,
+    @required this.data
+  }) {
     _application = this;
   }
 
@@ -24,42 +26,63 @@ class App {
   final String title = 'Ретог';
   final AppConfig config;
   final AppData data;
-  Sentry sentry;
-  Widget widget;
 
-  Future<void> run() async {
+  static Future<App> init() async {
+    if (_application != null)
+      return _application;
+
+    String developmentUrl = Platform.isIOS ? 'http://localhost:3000' : 'http://10.0.2.2:3000';
+    bool isDebug = false;
+    assert(isDebug = true); // Метод выполняется только в debug режиме
+
+    WidgetsFlutterBinding.ensureInitialized();
+
+    await FlutterUserAgent.init();
+    await DotEnv().load('.env');
+
+    AppConfig config = AppConfig(
+      packageInfo: await PackageInfo.fromPlatform(),
+      env: isDebug ? 'development' : 'production',
+      databaseVersion: 11,
+      apiBaseUrl: '${isDebug ? developmentUrl : 'https://data.unact.ru'}/api/'
+    );
+    AppData data = AppData(config);
+
     await data.setup();
-    User.init();
-    config.loadSaved();
-    widget = _buildWidget();
+    await _initSentry(dsn: DotEnv().env['SENTRY_DSN'], capture: !isDebug);
 
-    print('Started $name in ${config.env} environment');
-    runApp(widget);
+    return App._(
+      config: config,
+      data: data
+    );
   }
 
-  void _setupEnv() {
-    if (config.env != 'development') {
-      sentry = Sentry.setup(config);
-    }
+  Future<void> reportError(dynamic error, dynamic stackTrace) async {
+    print(error);
+    print(stackTrace);
+    await sentryLib.Sentry.captureException(error, stackTrace: stackTrace);
   }
 
-  Widget _buildWidget() {
-    return MaterialApp(
-      title: title,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        platform: TargetPlatform.android
-      ),
-      home: User.currentUser.isLogged() ? HomePage() : LoginPage(),
-      locale: Locale('ru', 'RU'),
-      localizationsDelegates: [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ],
-      supportedLocales: [
-        Locale('en', 'US'),
-        Locale('ru', 'RU'),
-      ]
+  static Future<void> _initSentry({
+    @required String dsn,
+    @required bool capture
+  }) async {
+    if (!capture)
+      return;
+
+    await sentryLib.SentryFlutter.init(
+      (options) {
+        options.dsn = dsn;
+        options.beforeSend = (sentryLib.SentryEvent event, {dynamic hint}) {
+          User user = User.currentUser;
+
+          return event.copyWith(user: sentryLib.User(
+            id: user.id.toString(),
+            username: user.username,
+            email: user.email
+          ));
+        };
+      }
     );
   }
 }
