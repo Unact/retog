@@ -9,10 +9,10 @@ import 'package:retog/app/modules/api.dart';
 class User {
   int id = kGuestId;
   String username = kGuestUsername;
-  String password;
   String email = '';
   String salesmanName;
-  String token;
+  String accessToken;
+  String refreshToken;
   String remoteVersion;
   int cReturnOrder;
 
@@ -23,10 +23,10 @@ class User {
     _currentUser = this;
     id = App.application.data.prefs.getInt('id');
     username = App.application.data.prefs.getString('username');
-    password = App.application.data.prefs.getString('password');
     salesmanName = App.application.data.prefs.getString('salesmanName');
     email = App.application.data.prefs.getString('email');
-    token = App.application.data.prefs.getString('token');
+    accessToken = App.application.data.prefs.getString('accessToken');
+    refreshToken = App.application.data.prefs.getString('refreshToken');
     cReturnOrder = App.application.data.prefs.getInt('cReturnOrder');
     remoteVersion = App.application.data.prefs.getString('remoteVersion');
   }
@@ -44,17 +44,17 @@ class User {
     Map<String, dynamic> map = Map<String, dynamic>();
     map['id'] = id;
     map['username'] = username;
-    map['password'] = password;
     map['salesman_name'] = salesmanName;
     map['email'] = email;
-    map['token'] = token;
+    map['access_token'] = accessToken;
+    map['refresh_token'] = refreshToken;
     map['remote_version'] = remoteVersion;
 
     return map;
   }
 
   bool isLogged() {
-    return password != null;
+    return accessToken != null;
   }
 
   Future<void> loadDataFromRemote() async {
@@ -70,10 +70,10 @@ class User {
   Future<void> reset() async {
     id = kGuestId;
     username = kGuestUsername;
-    password = null;
     email = '';
     salesmanName = null;
-    token = null;
+    accessToken = null;
+    refreshToken = null;
     remoteVersion = null;
     cReturnOrder = null;
 
@@ -85,10 +85,10 @@ class User {
 
     await (id != null ? prefs.setInt('id', id) : prefs.remove('id'));
     await (username != null ? prefs.setString('username', username) : prefs.remove('username'));
-    await (password != null ? prefs.setString('password', password) : prefs.remove('password'));
     await (email != null ? prefs.setString('email', email) : prefs.remove('email'));
     await (salesmanName != null ? prefs.setString('salesmanName', salesmanName) : prefs.remove('salesmanName'));
-    await (token != null ? prefs.setString('token', token) : prefs.remove('token'));
+    await (accessToken != null ? prefs.setString('accessToken', accessToken) : prefs.remove('accessToken'));
+    await (refreshToken != null ? prefs.setString('refreshToken', refreshToken) : prefs.remove('refreshToken'));
     await (remoteVersion != null ? prefs.setString('remoteVersion', remoteVersion) : prefs.remove('remoteVersion'));
     await (cReturnOrder != null ? prefs.setInt('cReturnOrder', cReturnOrder) : prefs.remove('cReturnOrder'));
   }

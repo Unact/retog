@@ -49,11 +49,11 @@ class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
   }
 
   void _showSnackBar(String content) {
-    _scaffoldKey.currentState?.showSnackBar(SnackBar(content: Text(content)));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(content)));
   }
 
   void _showErrorSnackBar(String content) {
-    _scaffoldKey.currentState?.showSnackBar(SnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(content),
       action: SnackBarAction(
         label: 'Повторить',

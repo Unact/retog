@@ -1,4 +1,4 @@
-import 'package:barcode_scan/barcode_scan.dart';
+import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
@@ -40,7 +40,7 @@ class _ReturnGoodsEditPageState extends State<ReturnGoodsEditPage> with WidgetsB
     return TypeAheadField(
       textFieldConfiguration: TextFieldConfiguration(
         maxLines: 2,
-        cursorColor: theme.textSelectionColor,
+        cursorColor: theme.textSelectionTheme.selectionColor,
         autocorrect: false,
         controller: _goodsController,
         textInputAction: TextInputAction.search,
@@ -207,7 +207,7 @@ class _ReturnGoodsEditPageState extends State<ReturnGoodsEditPage> with WidgetsB
   }
 
   void _showMessage(String content) {
-    _scaffoldKey.currentState?.showSnackBar(SnackBar(content: Text(content)));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(content)));
   }
 
   void _loadData() {

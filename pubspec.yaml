@@ -10,21 +10,18 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  dio: any
-  flutter_user_agent: any
-  pub_semver: any
-  cupertino_icons: any
-  path_provider: any
-  sqflite: any
-  intl: any
-  barcode_scan: any
-  sentry_flutter: any
-  flutter_dotenv: any
-  shared_preferences: any
-  package_info: any
-  flutter_typeahead: any
-  flutter_sticky_header: any
-  url_launcher: any
+  dio: ^4.0.0
+  fk_user_agent: ^2.0.1
+  pub_semver: ^2.0.0
+  path_provider: ^2.0.2
+  sqflite: ^2.0.0
+  barcode_scan2:  ^4.2.0
+  sentry_flutter: ^5.0.0
+  shared_preferences: ^2.0.6
+  package_info: ^2.0.2
+  flutter_typeahead: ^3.2.4
+  flutter_sticky_header: ^0.6.1
+  url_launcher: ^6.0.6
 
 dev_dependencies:
   flutter_test:

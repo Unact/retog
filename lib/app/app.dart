@@ -3,10 +3,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_user_agent/flutter_user_agent.dart';
+import 'package:fk_user_agent/fk_user_agent.dart';
 import 'package:package_info/package_info.dart';
-import 'package:sentry_flutter/sentry_flutter.dart' as sentryLib;
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'package:retog/app/models/user.dart';
 import 'package:retog/config/app_config.dart';
@@ -37,19 +36,18 @@ class App {
 
     WidgetsFlutterBinding.ensureInitialized();
 
-    await FlutterUserAgent.init();
-    await DotEnv().load('.env');
+    await FkUserAgent.init();
 
     AppConfig config = AppConfig(
       packageInfo: await PackageInfo.fromPlatform(),
       env: isDebug ? 'development' : 'production',
-      databaseVersion: 11,
+      databaseVersion: 12,
       apiBaseUrl: '${isDebug ? developmentUrl : 'https://data.unact.ru'}/api/'
     );
     AppData data = AppData(config);
 
     await data.setup();
-    await _initSentry(dsn: DotEnv().env['SENTRY_DSN'], capture: !isDebug);
+    await _initSentry(dsn: const String.fromEnvironment('RETOG_SENTRY_DSN'), capture: !isDebug);
 
     return App._(
       config: config,
@@ -60,7 +58,7 @@ class App {
   Future<void> reportError(dynamic error, dynamic stackTrace) async {
     print(error);
     print(stackTrace);
-    await sentryLib.Sentry.captureException(error, stackTrace: stackTrace);
+    await Sentry.captureException(error, stackTrace: stackTrace);
   }
 
   static Future<void> _initSentry({
@@ -70,13 +68,13 @@ class App {
     if (!capture)
       return;
 
-    await sentryLib.SentryFlutter.init(
+    await SentryFlutter.init(
       (options) {
         options.dsn = dsn;
-        options.beforeSend = (sentryLib.SentryEvent event, {dynamic hint}) {
+        options.beforeSend = (SentryEvent event, {dynamic hint}) {
           User user = User.currentUser;
 
-          return event.copyWith(user: sentryLib.User(
+          return event.copyWith(user: SentryUser(
             id: user.id.toString(),
             username: user.username,
             email: user.email

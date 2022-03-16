@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:flutter_user_agent/flutter_user_agent.dart';
+import 'package:fk_user_agent/fk_user_agent.dart';
 
 import 'package:retog/app/app.dart';
 import 'package:retog/app/models/user.dart';
@@ -20,10 +20,18 @@ class Api {
 
   static Future<void> login(String username, String password) async {
     await User.currentUser.reset();
-    await _authenticate(username, password);
+    dynamic response = await _request(
+      'POST',
+      'v2/authenticate',
+      headers: {
+        'Authorization': 'Renew login=$username,password=$password'
+      }
+    );
 
+    User.currentUser.accessToken = response['access_token'];
+    User.currentUser.refreshToken = response['refresh_token'];
     User.currentUser.username = username;
-    User.currentUser.password = password;
+
     await User.currentUser.save();
     await User.currentUser.loadDataFromRemote();
   }
@@ -32,9 +40,21 @@ class Api {
     await User.currentUser.reset();
   }
 
-  static Future<void> relogin() async {
-    User.currentUser.token = null;
-    await _authenticate(User.currentUser.username, User.currentUser.password);
+  static Future<void> refresh() async {
+    User.currentUser.accessToken = null;
+    dynamic response = await _request(
+      'POST',
+      'v2/refresh',
+      headers: {
+        'Authorization': 'Renew token=${User.currentUser.refreshToken}'
+      }
+    );
+
+    User.currentUser.accessToken = response['access_token'];
+    User.currentUser.refreshToken = response['refresh_token'];
+
+    await User.currentUser.save();
+    await User.currentUser.loadDataFromRemote();
   }
 
   static Future<dynamic> get(
@@ -92,7 +112,7 @@ class Api {
     try {
       return await _request(method, apiMethod, headers: headers, data: dataToSend, queryParameters: queryParameters);
     } on AuthException {
-      await relogin();
+      await refresh();
 
       if (dataToSend is FormData) {
         dataToSend = _createFileFormData(data, file, fileKey);
@@ -107,16 +127,16 @@ class Api {
 
     if (headers == null) headers = {};
 
-    if (User.currentUser.token != null) {
+    if (User.currentUser.accessToken != null) {
       headers.addAll({
-        'Authorization': 'Renew token=${User.currentUser.token}'
+        'Authorization': 'Renew token=${User.currentUser.accessToken}'
       });
     }
 
     headers.addAll({
       'Accept': 'application/json',
       'Retog': '$version',
-      HttpHeaders.userAgentHeader: 'Retog/$version ${FlutterUserAgent.userAgent}',
+      HttpHeaders.userAgentHeader: 'Retog/$version ${FkUserAgent.userAgent}',
     });
 
     return Dio(BaseOptions(
@@ -186,18 +206,6 @@ class Api {
     } on DioError catch(e) {
       _onDioError(e);
     }
-  }
-
-  static Future<void> _authenticate(String username, String password) async {
-    dynamic response = await _request(
-      'POST',
-      'v1/authenticate',
-      headers: {
-        'Authorization': 'Renew login=$username,password=$password'
-      }
-    );
-    User.currentUser.token = response['token'];
-    await User.currentUser.save();
   }
 }
 

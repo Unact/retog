@@ -266,7 +266,7 @@ class _ReturnOrderPageState extends State<ReturnOrderPage> {
   }
 
   void _showMessage(String content) {
-    _scaffoldKey.currentState?.showSnackBar(SnackBar(content: Text(content)));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(content)));
   }
 
   Future<void> _editReturnGoods(ReturnGoods returnGoods, BuildContext context) async {
@@ -376,21 +376,18 @@ class _ReturnOrderPageState extends State<ReturnOrderPage> {
     return Scaffold(
       key: _scaffoldKey,
       persistentFooterButtons: <Widget>[
-        FlatButton(
+        TextButton(
           onPressed: !_editable ? null : () async => await _clear(),
-          child: Text('Очистить'),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32.0))
+          child: Text('Очистить')
         ),
         SizedBox(width: 24),
-        FlatButton(
+        TextButton(
           onPressed: !_editable ? null : () async => await _editReturnGoods(await _addReturnGoods(), context),
-          child: Text('Добавить'),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32.0))
+          child: Text('Добавить')
         ),
-        FlatButton(
+        TextButton(
           onPressed: !_editable ? null : _saveReturnGoods,
-          child: Text('Сохранить'),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32.0))
+          child: Text('Сохранить')
         ),
       ],
       appBar: AppBar(

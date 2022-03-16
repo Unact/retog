@@ -78,7 +78,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _showSnackBar(String content) {
-    _scaffoldKey.currentState?.showSnackBar(SnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(content)
     ));
   }
@@ -127,12 +127,13 @@ class _LoginPageState extends State<LoginPage> {
                         padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
                         child: Container(
                           width: 160,
-                          child: RaisedButton(
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
+                              primary: Colors.blue,
+                            ),
                             onPressed: _submit,
-                            color: Colors.blueAccent,
-                            textColor: Colors.white,
-                            child: Text('Войти'),
+                            child: const Text('Войти'),
                           ),
                         )
                       ),
@@ -140,12 +141,13 @@ class _LoginPageState extends State<LoginPage> {
                         padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
                         child: Container(
                           width: 160,
-                          child: RaisedButton(
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
+                              primary: Colors.blue,
+                            ),
                             onPressed: _getNewPassword,
-                            color: Colors.blueAccent,
-                            textColor: Colors.white,
-                            child: Text('Получить пароль'),
+                            child: const Text('Получить пароль')
                           ),
                         )
                       ),

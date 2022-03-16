@@ -57,7 +57,7 @@ class _PersonPageState extends State<PersonPage> {
   }
 
   void _showMessage(String content) {
-    _scaffoldKey.currentState?.showSnackBar(SnackBar(content: Text(content)));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(content)));
   }
 
   Widget _buildInfoRow(String leftStr, String rightStr) {
@@ -80,14 +80,15 @@ class _PersonPageState extends State<PersonPage> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           User.currentUser.newVersionAvailable ?
-            RaisedButton(
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
-              child: Text('Обновить приложение'),
-              onPressed: _launchAppUpdate,
-              color: Colors.blueAccent,
-              textColor: Colors.white,
-            ) :
-            Container()
+              primary: Colors.blueAccent
+            ),
+            child: const Text('Обновить приложение', style: TextStyle(color: Colors.white)),
+            onPressed: _launchAppUpdate,
+          ) :
+          Container()
         ],
       )
     );
@@ -118,12 +119,14 @@ class _PersonPageState extends State<PersonPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  RaisedButton(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
-                    color: Colors.red,
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
+                      primary: Colors.red
+                    ),
+                    child: const Text('Выйти', style: TextStyle(color: Colors.white)),
                     onPressed: _logout,
-                    child: Text('Выйти', style: TextStyle(color: Colors.white)),
-                  ),
+                  )
                 ]
               )
             )
