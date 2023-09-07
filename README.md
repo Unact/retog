@@ -5,6 +5,7 @@
 Для сборки и запуска приложения необходимо иметь в корне проекта файл .env с переменными среды:
 
 * RETOG_SENTRY_DSN
+* RETOG_RENEW_URL
 
 Также приложения можно запускать без .env файла, но тогда при запуске надо указывать
-`--dart-define RETOG_SENTRY_DSN=<значение>`
+`--dart-define RETOG_SENTRY_DSN=<значение> --dart-define RETOG_RENEW_URL=<значение>`

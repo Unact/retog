@@ -1,35 +1,41 @@
 name: retog
-description: A new Flutter project.
+description: Приложение для создания возвратов
+publish_to: 'none'
 version: 1.5.1+35
 
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  sdk: '>=3.1.0 <4.0.0'
 
 dependencies:
+  collection: ^1.17.1
+  drift: ^2.9.0
+  equatable: ^2.0.5
   flutter:
     sdk: flutter
+  flutter_bloc: ^8.1.2
   flutter_localizations:
     sdk: flutter
-  dio: ^4.0.0
-  fk_user_agent: ^2.0.1
-  pub_semver: ^2.0.0
-  path_provider: ^2.0.2
-  sqflite: ^2.0.0
-  barcode_scan2:  ^4.2.1
-  sentry_flutter: ^6.11.1
-  shared_preferences: ^2.0.6
-  package_info: ^2.0.2
-  flutter_typeahead: ^4.1.1
-  flutter_sticky_header: ^0.6.1
-  url_launcher: ^6.0.6
+  flutter_typeahead: ^4.7.0
+  mask_text_input_formatter: ^2.4.0
+  package_info_plus: ^4.0.2
+  path: ^1.8.3
+  path_provider: ^2.0.9
+  provider: ^6.0.5
+  pub_semver: ^2.1.1
+  quiver: ^3.0.1
+  sentry_flutter: ^7.7.0
+  sqlite3_flutter_libs: ^0.5.0
+  u_app_utils:
+    git:
+      url: git@github.com:Unact/u_app_utils.git
+      ref: 47f85d1
 
 dev_dependencies:
+  build_runner: ^2.4.5
+  drift_dev: ^2.9.0
+  flutter_lints: ^2.0.1
   flutter_test:
     sdk: flutter
 
-# The following section is specific to Flutter.
 flutter:
   uses-material-design: true
-  assets:
-    - lib/data/schema.sql
-    - .env
