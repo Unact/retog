@@ -1,7 +1,7 @@
 name: retog
 description: Приложение для создания возвратов
 publish_to: 'none'
-version: 1.5.1+35
+version: 1.6.0+36
 
 environment:
   sdk: '>=3.1.0 <4.0.0'
