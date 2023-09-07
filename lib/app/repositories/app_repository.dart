@@ -57,4 +57,8 @@ class AppRepository extends BaseRepository {
       throw AppError(Strings.genericErrorMsg);
     }
   }
+
+  Future<void> clearData() async {
+    await dataStore.clearData();
+  }
 }
