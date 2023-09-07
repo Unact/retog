@@ -1,39 +1,74 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:u_app_utils/u_app_utils.dart';
 
-import 'package:retog/app/app.dart';
-import 'package:retog/app/models/user.dart';
-import 'package:retog/app/pages/home_page.dart';
-import 'package:retog/app/pages/login_page.dart';
+import 'app/constants/strings.dart';
+import 'app/data/database.dart';
+import 'app/pages/landing/landing_page.dart';
+import 'app/repositories/app_repository.dart';
+import 'app/repositories/returns_repository.dart';
+import 'app/repositories/users_repository.dart';
 
 void main() async {
-  App app = await App.init();
-
-  User.init();
-  app.config.loadSaved();
-
   runZonedGuarded<Future<void>>(() async {
-    runApp(MaterialApp(
-      title: app.title,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        platform: TargetPlatform.android
-      ),
-      home: User.currentUser.isLogged() ? HomePage() : LoginPage(),
-      locale: Locale('ru', 'RU'),
-      localizationsDelegates: [
-        GlobalMaterialLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ],
-      supportedLocales: [
-        Locale('en', 'US'),
-        Locale('ru', 'RU'),
-      ]
-    ));
+    Provider.debugCheckInvalidValueType = null;
+    WidgetsFlutterBinding.ensureInitialized();
+
+    await PackageInfo.fromPlatform();
+
+    bool isDebug = Misc.isDebug();
+    RenewApi api = await RenewApi.init(appName: Strings.appName);
+    AppDataStore dataStore = AppDataStore(logStatements: isDebug);
+    AppRepository appRepository = AppRepository(dataStore, api);
+    ReturnsRepository returnsRepository = ReturnsRepository(dataStore, api);
+    UsersRepository usersRepository = UsersRepository(dataStore, api);
+
+    await Initialization.initializeSentry(
+      dsn: const String.fromEnvironment('RETOG_SENTRY_DSN'),
+      isDebug: isDebug,
+      userGenerator: () async {
+        User user = await usersRepository.getUser();
+
+        return SentryUser(id: user.id.toString(), username: user.username, email: user.email);
+      }
+    );
+    Initialization.intializeFlogs(isDebug: isDebug);
+
+    runApp(
+      MultiRepositoryProvider(
+        providers: [
+          RepositoryProvider.value(value: appRepository),
+          RepositoryProvider.value(value: returnsRepository),
+          RepositoryProvider.value(value: usersRepository)
+        ],
+        child: MaterialApp(
+          title: Strings.ruAppName,
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+            platform: TargetPlatform.android,
+            visualDensity: VisualDensity.adaptivePlatformDensity
+          ),
+          home: LandingPage(),
+          locale: const Locale('ru', 'RU'),
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('en', 'US'),
+            Locale('ru', 'RU'),
+          ]
+        )
+      )
+    );
   }, (Object error, StackTrace stackTrace) {
-    app.reportError(error, stackTrace);
+    Misc.reportError(error, stackTrace);
   });
 }
