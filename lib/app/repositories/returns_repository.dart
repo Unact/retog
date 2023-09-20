@@ -40,7 +40,7 @@ class ReturnsRepository extends BaseRepository {
   }) async {
     final companion = ReturnOrdersCompanion.insert(
       buyerId: buyer.id,
-      needPickup: false
+      needPickup: true
     );
 
     await dataStore.returnsDao.clearReturnOrderLines();
